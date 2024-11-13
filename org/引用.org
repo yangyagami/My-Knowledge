@@ -1,0 +1,47 @@
+* 如何引用另一个 org
+在 Emacs Org-mode 中引用另一个 Org 文件的内容，可以使用以下几种方法：
+1. 使用 org-include 指令
+
+你可以在一个 Org 文件中包含另一个 Org 文件的内容，使用 #+INCLUDE 指令。例如：
+
+#+begin_src org
+#+INCLUDE: "path/to/other-file.org"
+#+end_src
+
+这将把 other-file.org 的内容插入到当前文件中。
+
+2. 使用链接
+
+你可以创建指向另一个 Org 文件的链接。使用以下格式：
+#+BEGIN_SRC org
+  [[file:跳转引用.org][跳转引用]]
+#+END_SRC
+
+[[file:跳转引用.org][跳转引用]]
+
+这将创建一个可点击的链接，点击后会打开指定的 Org 文件。
+
+3. 使用 org-ref 或 org-noter
+
+如果你需要在文档中进行引用和注释，可以使用 org-ref 或 org-noter 等扩展包。这些包提供了更强大的引用和注释功能，适合学术写作。
+
+4. 使用 org-id 进行引用
+
+如果你在 Org 文件中使用了 org-id，可以通过 ID 引用其他文件中的特定条目。首先，确保你在目标条目中生成了 ID：
+
+#+BEGIN_SRC org
+    目标条目：
+	  :PROPERTIES:
+	  :ID: 12345678-1234-1234-1234-123456789abc
+	  :END:
+#+END_SRC
+
+然后在其他文件中引用它：
+[[id:12345678-1234-1234-1234-123456789abc][链接文本]]
+
+5. 使用 org-attach
+
+如果你在一个 Org 文件中使用 org-attach，可以将文件附加到特定的条目，并在其他 Org 文件中引用这些附件。
+总结
+
+以上方法可以帮助你在 Emacs Org-mode 中引用其他 Org 文件的内容。选择适合你需求的方法来组织和管理你的笔记。

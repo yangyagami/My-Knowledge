@@ -1,0 +1,101 @@
+* 在 Org mode 中执行代码块
+
+简单描述：C-c C-c 执行代码块。
+
+在 Org mode 中执行代码块时，默认情况下，结果会以格式化的方式显示。如果你希望执行结果以原始文本的形式显示，而不进行格式化，可以使用 :results 选项来控制输出格式。
+
+支持的选项：
+- raw（直接显示）
+- output（默认）
+- value（将结果作为值返回。）
+- file（将结果写入文件。）
+  
+#+BEGIN_SRC C++ :results raw
+  #include <iostream>
+
+  int main() {
+    std::cout << "Hello World" << std::endl;
+    return 0;
+  }
+#+END_SRC
+
+#+RESULTS:
+Hello World
+
+在 Org mode 中执行代码块是一个非常强大的功能，可以让你在文档中嵌入可执行的代码。
+
+** 1. 创建代码块
+
+代码块的基本语法如下：
+
+#+BEGIN_SRC 语言
+代码
+#+END_SRC
+
+例如，创建一个 Python 代码块：
+
+#+BEGIN_SRC python
+print("Hello, World!")
+#+END_SRC
+
+** 2. 执行代码块
+
+要执行代码块，可以将光标放在代码块内，然后使用以下命令：
+
+- M-x org-babel-execute-src-block：执行当前代码块。
+- C-c C-c：在代码块内执行当前代码块。
+
+执行后，结果会显示在代码块下方。
+
+** 3. 结果输出
+
+可以选择将结果输出到代码块下方或在其他位置。要将结果输出到代码块下方，可以在代码块的开头添加 `:results` 选项。例如：
+
+#+BEGIN_SRC python :results output
+print("Hello, World!")
+#+END_SRC
+
+** 4. 支持的语言
+
+Org mode 支持多种编程语言，包括但不限于：
+
+- Python
+- R
+- Shell
+- JavaScript
+- Ruby
+- C/C++
+
+要确保支持特定语言，你可能需要安装相应的解释器或编译器，并在 Emacs 中配置 Org Babel。
+
+** 5. 配置 Org Babel
+
+如果想启用更多语言支持，可以在你的 Emacs 配置文件中添加以下代码：
+
+#+BEGIN_SRC emacs-lisp
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((python . t)
+   (sh . t)
+   (ruby . t)
+   (R . t)
+   (javascript . t)
+   (C . t)))
+#+END_SRC
+
+** 6. 交互式会话
+
+可以使用 `:session` 选项来创建一个交互式会话，这样可以在同一会话中执行多个代码块。例如：
+
+#+BEGIN_SRC python :session
+x = 10
+y = 20
+z = x + y
+#+END_SRC
+
+* 总结
+
+- 使用 `#+BEGIN_SRC` 和 `#+END_SRC` 创建代码块。
+- 使用 `M-x org-babel-execute-src-block` 或 `C-c C-c` 执行代码块。
+- 可以通过配置 `org-babel-load-languages` 来启用更多语言支持。
+  

@@ -1,0 +1,42 @@
+在 Emacs 中启用文本换行（wrap）功能，可以通过以下几种方式实现：
+1. 启用 visual-line-mode
+
+visual-line-mode 是 Emacs 中用于视觉换行的模式。启用后，长行文本会在窗口边缘自动换行，而不会插入实际的换行符。
+
+要启用 visual-line-mode，可以在命令行中输入：
+#+BEGIN_SRC elisp
+  M-x visual-line-mode
+#+END_SRC
+
+2. 在特定模式中启用
+
+如果你希望在特定模式（例如 text-mode）中自动启用 visual-line-mode，可以在你的 Emacs 配置文件（通常是 ~/.emacs 或 ~/.emacs.d/init.el）中添加以下代码：
+#+BEGIN_SRC elisp
+  (add-hook 'text-mode-hook 'visual-line-mode)
+#+END_SRC
+
+3. 启用 auto-fill-mode
+
+如果你希望在输入时自动插入换行符，可以使用 auto-fill-mode。启用后，当一行达到指定的字符宽度时，Emacs 会自动插入换行符。
+
+要启用 auto-fill-mode，可以在命令行中输入：
+#+BEGIN_SRC elisp
+  M-x auto-fill-mode
+#+END_SRC
+
+同样，你可以在配置文件中为特定模式启用它：
+#+BEGIN_SRC elisp
+  (add-hook 'text-mode-hook 'auto-fill-mode)
+#+END_SRC
+
+4. 设置填充宽度
+   
+如果你使用 auto-fill-mode，可以设置填充宽度（即行的最大字符数），例如：
+#+BEGIN_SRC elisp
+  (setq-default fill-column 80)  ; 设置填充宽度为 80 个字符
+#+END_SRC
+
+*总结*:
+- 使用 M-x visual-line-mode 启用视觉换行。
+- 使用 M-x auto-fill-mode 启用自动换行。
+- 可以通过在配置文件中添加钩子来为特定模式自动启用这些功能。

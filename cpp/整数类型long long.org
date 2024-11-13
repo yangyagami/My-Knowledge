@@ -1,0 +1,111 @@
+*long long 是 C++11 才加入的。*
+
+#+BEGIN_QUOTE
+long long 这个类型早在1995年6月之前就由罗兰·哈丁格（Roland Hartinger）提出申请加入 C++ 标准。但是当时的 C++ 标准委员会以 C语言 中不存在这个基本类型为由，拒绝将这个类型加入 C++ 中。而就在 C++98 标准出台的一年后，C99 标准就添加了 long long 这个类型，并且流行的编译器也纷纷支持了该类型，这也就是我们很早就接触到 long long 的原因。在此之后 C++ 标准委员会在 C++11 中才有计划将整型 long long 加入标准中。
+#+END_QUOTE
+
+C++ 标准中定义，long long 是一个至少为64位的整数类型。请注意这里的用词“至少”​，也就说 long long 的实际长度可能大于64位。另外，long long 是一个有符号类型，对应的无符号类型为 unsigned long long，诸如 long long int、unsigned long long int 等类型，实际上它们和 long long、unsigned long long 具有相同的含义。C++ 标准还为其定义 LL 和 ULL 作为这两种类型的字面量后缀，所以在初始化 long long 类型变量的时候可以这么写：
+#+BEGIN_SRC cpp
+  long long x = 65536LL;
+#+END_SRC
+
+当然，这里可以忽略LL这个字面量后缀，直接写成下面的形式也可以达到同样的效果：
+#+BEGIN_SRC cpp
+  long long x = 65536;
+#+END_SRC
+
+要强调的是，字面量后缀并不是没有意义的，在某些场合下我们必须用到它才能让代码的逻辑正确，比如下面的代码：
+#+BEGIN_SRC C++
+  #include <iostream>
+
+  int main() {
+    long long x1 = 65536 << 16;      // 计算得到的x1值为0
+    std::cout << "x1 = " << x1 << std::endl;
+
+    long long x2 = 65536LL << 16;    // 计算得到的x2值为4294967296（0x100000000）
+    std::cout << "x2 = " << x2 << std::endl;
+  }
+#+END_SRC
+
+#+RESULTS:
+| x1 | = |          0 |
+| x2 | = | 4294967296 |
+*(默认不带后缀被当作 int 处理了，也就是 32 位)*
+
+*有些编译器可能在编译 long long x1 = 65536 << 16 的时候显示一些警告提示，而另一些编译器可能没有。*
+
+和其他整型一样，long long 也能运用于枚举类型和位域，例如：
+#+BEGIN_SRC C++
+  #include <iostream>
+
+  enum longlong_enum : long long {
+    x1,
+    x2
+  };
+
+  struct longlong_struct {
+    long long x1 : 8;
+    long long x2 : 24;
+    long long x3 : 32;
+  };
+
+  int main() {
+    std::cout << sizeof(longlong_enum::x1) << std::endl;  // 输出大小为8
+    std::cout << sizeof(longlong_struct) << std::endl;    // 输出大小为8
+  }
+#+END_SRC
+
+#+RESULTS:
+| 8 |
+| 8 |
+*(struct 大小为 8 + 24 + 32 考虑对齐)*
+
+在头文件 climits 中增加了以下宏，分别代表 long long 的最大值和最小值以及 unsigned long long 的最大值：
+#+BEGIN_SRC C++
+  #include <climits>
+
+  #define LLONG_MAX 9223372036854775807LL         // long long的最大值
+  #define LLONG_MIN (-9223372036854775807LL - 1)  // long long的最小值
+  #define ULLONG_MAX 0xffffffffffffffffULL        // unsigned long long的最大值
+#+END_SRC
+
+C++标准中对标准库头文件做了扩展，特化了 long long 和 unsigned long long 版本的 numeric_limits 类模板。这使我们能够更便捷地获取这些类型的最大值和最小值，如下面的代码示例：
+#+BEGIN_SRC C++ :results raw
+  #include <iostream>
+  #include <climits>
+  #include <limits>
+  #include <cstdio>
+  int main(int argc, char *argv[])
+  {
+    // 使用宏方法
+    std::cout << "LLONG_MAX = " << LLONG_MAX << std::endl;
+    std::cout << "LLONG_MIN = " << LLONG_MIN << std::endl;
+    std::cout << "ULLONG_MAX = " << ULLONG_MAX << std::endl;
+
+    // 使用类模板方法
+    std::cout << "std::numeric_limits<long long>::max() = " 
+	      << std::numeric_limits<long long>::max() << std::endl;
+    std::cout << "std::numeric_limits<long long>::min() = " 
+	      << std::numeric_limits<long long>::min() << std::endl;
+    std::cout << "std::numeric_limits<unsigned long long>::max() = " 
+	      << std::numeric_limits<unsigned long long>::max() << std::endl;
+
+    // 使用printf打印输出
+    std::printf("LLONG_MAX = %lld\n", LLONG_MAX);
+    std::printf("LLONG_MIN = %lld\n", LLONG_MIN);
+    std::printf("ULLONG_MAX = %llu\n", ULLONG_MAX);
+  }
+#+END_SRC
+
+#+RESULTS:
+LLONG_MAX = 9223372036854775807
+LLONG_MIN = -9223372036854775808
+ULLONG_MAX = 18446744073709551615
+std::numeric_limits<long long>::max() = 9223372036854775807
+std::numeric_limits<long long>::min() = -9223372036854775808
+std::numeric_limits<unsigned long long>::max() = 18446744073709551615
+LLONG_MAX = 9223372036854775807
+LLONG_MIN = -9223372036854775808
+ULLONG_MAX = 18446744073709551615
+
+随着整型 long long 的加入，std::printf 也加入了对其格式化打印的能力。新增的长度指示符 ll 可以用来指明变量是一个 long long 类型，所以我们分别使用 %lld 和 %llu 来格式化有符号和无符号的 long long 整型了。

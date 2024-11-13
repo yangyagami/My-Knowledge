@@ -1,0 +1,53 @@
+* 在 Emacs 中增加行间距
+
+#+BEGIN_SRC emacs-lisp
+(setq line-spacing 0.2)  ; 设置行间距为 0.2
+#+END_SRC
+
+在 Emacs 中增加行间距可以通过设置 `line-spacing` 变量来实现。以下是几种方法来增加行间距：
+
+** 1. 临时设置行间距
+
+你可以在 Emacs 中直接设置 `line-spacing` 变量。例如，使用 `M-:`（`Alt + :`）打开命令输入，然后输入以下命令：
+
+#+BEGIN_SRC emacs-lisp
+(setq line-spacing 0.2)  ; 设置行间距为 0.2
+#+END_SRC
+
+你可以根据需要调整数值，数值越大，行间距越大。
+
+** 2. 在特定模式中设置行间距
+
+如果你只想在特定模式（例如 `text-mode` 或 `org-mode`）中增加行间距，可以使用 `add-hook` 来实现。例如：
+
+#+BEGIN_SRC emacs-lisp
+(add-hook 'text-mode-hook (lambda () (setq line-spacing 0.2)))
+(add-hook 'org-mode-hook (lambda () (setq line-spacing 0.2)))
+#+END_SRC
+
+** 3. 在配置文件中设置全局行间距
+
+如果你希望在所有模式中都增加行间距，可以在你的 Emacs 配置文件（通常是 `~/.emacs` 或 `~/.emacs.d/init.el`）中添加以下代码：
+
+#+BEGIN_SRC emacs-lisp
+(setq-default line-spacing 0.2)  ; 设置全局行间距为 0.2
+#+END_SRC
+
+** 4. 使用 `set-face-attribute`
+
+你还可以通过 `set-face-attribute` 函数来设置特定字体的行间距。例如：
+
+#+BEGIN_SRC emacs-lisp
+(set-face-attribute 'default nil :line-spacing 0.2)
+#+END_SRC
+
+** 5. 重新加载配置
+
+在修改配置文件后，记得重新加载配置或重启 Emacs，以使更改生效。
+
+* 总结
+
+- 使用 `setq line-spacing` 设置行间距。
+- 可以在特定模式中使用 `add-hook` 设置行间距。
+- 在配置文件中使用 `setq-default` 设置全局行间距。
+- 使用 `set-face-attribute` 设置特定字体的行间距。

@@ -1,0 +1,62 @@
+* Org-mode 中的元数据
+
+Example:
+#+TITLE: 例子
+#+AUTHOR: Yangsiyu
+#+DATE: <2024-11-12 二>
+#+EMAIL: a651685099@163.com
+
+** 1. 文档标题
+   - 使用 `#+TITLE:` 来设置文档的标题。
+   - 示例：
+     #+BEGIN_SRC org
+     #+TITLE: 我的文档标题
+     #+END_SRC
+
+** 2. 作者信息
+   - 使用 `#+AUTHOR:` 来设置文档的作者。
+   - 示例：
+     #+BEGIN_SRC org
+     #+AUTHOR: 作者姓名
+     #+END_SRC
+
+** 3. 日期
+   - 使用 `#+DATE:` 来设置文档的日期。
+   - 示例：
+     #+BEGIN_SRC org
+     #+DATE: 2023-10-01
+     #+END_SRC
+
+** 4. 其他元数据
+   - 你可以使用其他元数据来设置文档的属性，例如：
+     - `#+EMAIL:`：设置作者的电子邮件地址。
+     - `#+KEYWORDS:`：设置文档的关键词。
+     - `#+DESCRIPTION:`：设置文档的描述。
+   - 示例：
+     #+BEGIN_SRC org
+     #+EMAIL: author@example.com
+     #+KEYWORDS: Org-mode, Emacs
+     #+DESCRIPTION: 这是一个 Org-mode 示例文档
+     #+END_SRC
+
+** 5. 导出选项
+   - 可以使用 `#+OPTIONS:` 来设置导出时的选项，例如是否显示标题、作者等。
+   - 示例：
+     #+BEGIN_SRC org
+     #+OPTIONS: toc:nil num:nil
+     #+END_SRC
+   - 这将禁用目录（toc）和编号（num）。
+     
+** 6. 自定义属性
+   - 可以为特定条目设置自定义属性，使用 `:PROPERTIES:` 块。
+   - 示例：
+     #+BEGIN_SRC org
+     * 任务
+       :PROPERTIES:
+       :ID: unique-id
+       :STATUS: TODO
+       :END:
+     #+END_SRC
+
+* 总结
+元数据在 Org-mode 中用于描述文档的基本信息和设置。通过合理使用元数据，可以提高文档的可读性和可维护性，并在导出时提供更多的控制。
