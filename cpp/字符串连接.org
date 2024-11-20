@@ -1,0 +1,36 @@
+#+TITLE: 字符串连接
+#+DATE: <2024-11-14 四>
+#+AUTHOR: 杨思宇
+
+前置：
+- [[file:编码.org][编码与字符集]]
+- [[file:char16_t 与 char32_t.org][char16_t char_32_t]]
+- [[file:wchar_t.org][wchar_t]]
+
+如果两个字符串字面量具有相同的前缀，则生成的连接字符串字面量也具有该前缀，如果其中一个字符串字面量没有前缀，则将其视为与另一个字符串字面量具有相同前缀的字符串字面量，其他的连接行为由具体实现者定义。另外，这里的连接操作是编译时的行为，而不是一个转换。
+| 源代码      | 等同于  | 源代码      | 等同于  | 源代码      | 等同于  |
+|-----------+-------+-----------+-------+-----------+-------|
+| u"a" u"b" | u"ab" | U"a" U"b" | U"ab" | L"a" L"b" | L"ab" |
+| u"a" "b"  | u"ab" | U"a" "b"  | U"ab" | L"a" "b"  | L"ab" |
+| "a" u"b"  | u"ab" | "a" U"b"  | U"ab" | "a" L"b"  | L"ab" |
+
+*需要注意的是，进行连接的字符依然是保持独立的，也就是说不会因为字符串连接，将两个字符合并为一个，例如连接"\xA""B"的结果应该是"\nB"（换行符和字符B）​，而不是一个字符"\xAB"。（ \xAB 为 16 进制 0xAB ）*
+#+BEGIN_SRC C++ :results output
+  #include <iostream>
+  #include <cstdio>
+
+  int main() {
+    const char *str = "\xA";
+    const char *test = "\xA""B";
+    std::printf("%d %d %s\n", str[0], str[1], str);
+    std::printf("%s\n", test);
+    return 0;
+  }
+#+END_SRC
+
+#+RESULTS:
+*第一个 printf 会打印两个换行符*
+: 10 0 
+: 
+: 
+: B

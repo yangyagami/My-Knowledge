@@ -1,0 +1,24 @@
+#+TITLE: char8_t
+#+DATE: <2024-11-14 四>
+#+AUTHOR: 杨思宇
+
+前置：[[file:char16_t 与 char32_t.org][char16_t && char_32_t]]
+
+C++20 引入了 char8_t,它可以代替 char 作为 UTF-8 的字符类型。char8_t 具有和 unsigned char 相同的符号属性、存储大小、对齐方式以及整数转换等级。引入 char8_t 类型后，在 C++17 环境下可以编译的 UTF-8 字符相关的代码会出现问题：
+#+BEGIN_SRC C++
+  char str[] = u8"text";  // C++17编译成功；C++20编译失败，需要char8_t
+  char c = u8'c';  // C++17 前无法编译成功
+#+END_SRC
+当然反过来也不行：
+#+BEGIN_SRC C++
+  char8_t c8a[] = "text"; // C++20编译失败，需要char
+  char8_t c8 = 'c';
+#+END_SRC
+
+另外，为了匹配新的char8_t字符类型，库函数也有相应的增加：
+#+BEGIN_SRC C++
+  size_t mbrtoc8(char8_t* pc8, const char* s, size_t n, mbstate_t* ps);
+  size_t c8rtomb(char* s, char8_t c8, mbstate_t* ps);
+
+  using u8string = basic_string;
+#+END_SRC

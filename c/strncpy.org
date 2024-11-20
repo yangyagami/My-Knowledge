@@ -1,0 +1,54 @@
+#+TITLE: strncpy
+#+DATE: <2024-11-18 一>
+#+AUTHOR: yangsiyu
+
+引用自 man 手册
+#+BEGIN_QUOTE
+LIBRARY
+       Standard C library (libc, -lc)
+
+SYNOPSIS
+       #include <string.h>
+
+       char *strncpy(char dst[restrict .dsize], const char *restrict src,
+                     size_t dsize);
+       char *stpncpy(char dst[restrict .dsize], const char *restrict src,
+                     size_t dsize);
+
+       These functions copy non-null bytes from the string pointed  to  by  src
+       into  the  array  pointed to by dst.  If the source has too few non-null
+       bytes to fill the destination, the functions pad  the  destination  with
+       trailing  null  bytes.   If the destination buffer, limited by its size,
+       isn't large enough to hold the copy, the resulting character sequence is
+       truncated.  For the difference between the  two  functions,  see  RETURN
+       VALUE.
+
+       An implementation of these functions might be:
+
+           char *
+           strncpy(char *restrict dst, const char *restrict src, size_t dsize)
+           {
+               stpncpy(dst, src, dsize);
+               return dst;
+           }
+
+           char *
+           stpncpy(char *restrict dst, const char *restrict src, size_t dsize)
+           {
+               size_t  dlen;
+
+	       /*
+strnlen 是 C 语言中的一个函数，用于计算字符串的长度，但与 strlen 不同的是，它还接受一个最大长度参数，以防止在处理不以空字符（'\0'）结尾的字符串时发生缓冲区溢出。
+	       */
+               dlen = strnlen(src, dsize);
+               return memset(mempcpy(dst, src, dlen), 0, dsize - dlen);
+           }
+
+RETURN VALUE
+       strncpy()
+              returns dst.
+
+       stpncpy()
+              returns a pointer to one after the last character in the destina‐
+              tion character sequence.
+#+END_QUOTE

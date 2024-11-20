@@ -1,0 +1,31 @@
+#+TITLE: char16_t 与 char32_t
+#+DATE: <2024-11-13 三>
+#+AUTHOR: 杨思宇
+
+在 C++98 的标准中提供了一个 wchar_t 字符类型，并且还提供了前缀 L，用它表示一个宽字符。事实上 Windows 系统的 API 使用的就是 wchar_t，它在 Windows 内核中是一个最基础的字符类型：
+#+BEGIN_SRC C++
+  HANDLE CreateFileW(
+      LPCWSTR lpFileName,  // const wchar_t *lpFileName
+  );
+
+  CreateFileW(L"c:\\tmp.txt", …);
+#+END_SRC
+
+wchar_t 确实在一定程度上能够满足我们对于字符表达的需求，但是起初在定义 wchar_t 时并没有规定其占用内存的大小。于是就给了实现者充分的自由，以至于在 Windows 上 wchar_t 是一个 16 位长度的类型（2 字节）​，而在 Linux 和 macOS 上 wchar_t 却是 32 位的（4 字节）​。这导致了一个严重的后果，我们写出的代码无法在不同平台上保持相同行为。而 char16_t 和 char32_t 的出现解决了这个问题，它们明确规定了其所占内存空间的大小，让代码在任何平台上都能够有一致的表现。
+#+BEGIN_SRC C++
+  #include <iostream>
+
+  int main() {
+    wchar_t wstr[] = L"Hello World";  // 字符串需要 L 字面量修饰，否则无法通过编译。
+    wchar_t wc = 'H';
+
+    std::cout << "sizeof(wstr): " << sizeof(wstr) << std::endl;
+    std::cout << "sizeof(wc): " << sizeof(wc) << std::endl;
+  }
+#+END_SRC
+
+以上代码在 Linux 下执行结果：
+#+RESULTS:
+| sizeof(wstr): | 48 |
+| sizeof(wc):   |  4 |
+

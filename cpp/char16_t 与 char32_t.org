@@ -1,0 +1,63 @@
+#+TITLE: char16_t 与 char32_t
+#+DATE: <2024-11-13 三>
+#+AUTHOR: 杨思宇
+
+前置： [[file:编码.org][编码与字符集]]
+
+C++11 新增加了 char16_t 和 char32_t 以及三种字面量用于编码字符和字符串，分别是：
+- u8(UTF-8)
+- u(UTF-16)
+- U(UTF-32)
+#+BEGIN_SRC C++ :results raw
+  #include <iostream>
+
+  #define PRINT_SIZE(x) std::cout << ""#x" size: " << sizeof(x) << std::endl;
+
+  int main() {
+    char utf8c = u8'a';             // C++17 前 u8 只能作为字符串的字面量。
+    //char utf8c = u8'好';          // 无法编译，‘好’需要 3 个字节。
+    char16_t utf16c = u'好';
+    char32_t utf32c = U'好';
+
+    // 注意 '\0' 。
+    char utf8[] = u8"你好世界";
+    char16_t utf16[] = u"你好世界";  // sizeof(utf16): 10
+    char32_t utf32[] = U"你好世界";  // sizeof(utf32): 20
+
+    PRINT_SIZE(utf8c);
+    PRINT_SIZE(utf16c);
+    PRINT_SIZE(utf32c);
+    PRINT_SIZE(utf8);
+    PRINT_SIZE(utf16);
+    PRINT_SIZE(utf32);
+  }
+
+  #undef PRINT_SIZE
+#+END_SRC
+
+#+RESULTS:
+utf8c size: 1
+utf16c size: 2
+utf32c size: 4
+utf8 size: 13
+utf16 size: 10
+utf32 size: 20
+
+随着新字符类型加入 C++11 标准，相应的库函数也加入进来。C++11 在中增加了 4 个字符的转换函数，包括：
+#+BEGIN_SRC C++
+  #include <cuchar>
+
+  size_t mbrtoc16( char16_t* pc16, const char* s, size_t n, mbstate_t* ps );
+  size_t c16rtomb( char* s, char16_t c16, mbstate_t* ps );
+  size_t mbrtoc32( char32_t* pc32, const char* s, size_t n, mbstate_t* ps );
+  size_t c32rtomb( char* s, char32_t c32, mbstate_t* ps );
+#+END_SRC
+
+C++11 中也添加了 C++ 风格的转发方法 std::wstring_convert 以及 std::codecvt。使用类模板 std::wstring_convert 和 std::codecvt 相结合，可以对多字节字符串和宽字符串进行转换。 *它们在 C++17 标准中已经不被推荐使用了，所以应该尽量避免使用它们。*
+
+除此之外，C++ 标准库的字符串也加入了对新字符类型的支持:
+#+BEGIN_SRC C++
+  using u16string = basic_string;
+  using u32string = basic_string;
+  using wstring = basic_string;
+#+END_SRC

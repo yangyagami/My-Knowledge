@@ -1,10 +1,14 @@
+#+TITLE: 编码
+#+DATE: <2024-11-13 三>
+#+AUTHOR: 杨思宇
+
 *long long 是 C++11 才加入的。*
 
 #+BEGIN_QUOTE
 long long 这个类型早在1995年6月之前就由罗兰·哈丁格（Roland Hartinger）提出申请加入 C++ 标准。但是当时的 C++ 标准委员会以 C语言 中不存在这个基本类型为由，拒绝将这个类型加入 C++ 中。而就在 C++98 标准出台的一年后，C99 标准就添加了 long long 这个类型，并且流行的编译器也纷纷支持了该类型，这也就是我们很早就接触到 long long 的原因。在此之后 C++ 标准委员会在 C++11 中才有计划将整型 long long 加入标准中。
 #+END_QUOTE
 
-C++ 标准中定义，long long 是一个至少为64位的整数类型。请注意这里的用词“至少”​，也就说 long long 的实际长度可能大于64位。另外，long long 是一个有符号类型，对应的无符号类型为 unsigned long long，诸如 long long int、unsigned long long int 等类型，实际上它们和 long long、unsigned long long 具有相同的含义。C++ 标准还为其定义 LL 和 ULL 作为这两种类型的字面量后缀，所以在初始化 long long 类型变量的时候可以这么写：
+C++ 标准中定义，long long 是一个 *至少* 为64位的整数类型。请注意这里的用词“至少”​，也就说 long long 的实际长度可能大于64位。另外，long long 是一个有符号类型，对应的无符号类型为 unsigned long long，诸如 long long int、unsigned long long int 等类型，实际上它们和 long long、unsigned long long 具有相同的含义。C++ 标准还为其定义 LL 和 ULL 作为这两种类型的字面量后缀，所以在初始化 long long 类型变量的时候可以这么写：
 #+BEGIN_SRC cpp
   long long x = 65536LL;
 #+END_SRC
