@@ -1,0 +1,33 @@
+#+TITLE: 线程
+#+AUTHOR: Yangsiyu
+#+DATE: <2025-02-27 四>
+#+EMAIL: a651685099@163.com
+
+#+BEGIN_QUOTE
+It is important to remember that a QThread instance lives in the old thread that instantiated it, not in the new thread that calls run(). This means that all of QThread's queued slots and invoked methods will execute in the old thread. Thus, a developer who wishes to invoke slots in the new thread must use the worker-object approach; new slots should not be implemented directly into a subclassed QThread.
+
+Unlike queued slots or invoked methods, methods called directly on the QThread object will execute in the thread that calls the method. When subclassing QThread, keep in mind that the constructor executes in the old thread while run() executes in the new thread. If a member variable is accessed from both functions, then the variable is accessed from two different threads. Check that it is safe to do so.
+#+END_QUOTE
+
+#+BEGIN_SRC C++
+  class WorkerThread : public QThread
+  {
+    Q_OBJECT
+    void run() override {
+      QString result;
+      /* ... here is the expensive or blocking operation ... */
+      emit resultReady(result);
+    }
+   signals:
+    void resultReady(const QString &s);
+  };
+
+  void MyObject::startWorkInAThread()
+  {
+    WorkerThread *workerThread = new WorkerThread(this);
+    // handleResults 是在 MyObject 线程中执行的，这是安全的：）。
+    connect(workerThread, &WorkerThread::resultReady, this, &MyObject::handleResults);
+    connect(workerThread, &WorkerThread::finished, workerThread, &QObject::deleteLater);
+    workerThread->start();
+  }
+#+END_SRC

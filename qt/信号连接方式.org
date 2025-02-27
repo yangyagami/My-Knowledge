@@ -7,7 +7,7 @@
 1. 连接方式的类型
 Qt 提供了 5 种连接方式（通过 Qt::ConnectionType 枚举定义）：
     - AutoConnection（默认）
-        行为：自动选择 DirectConnection 或 QueuedConnection，取决于信号发送者（Sender）和接收者（Receiver）是否在同一个线程。
+      行为：自动选择 DirectConnection 或  QueuedConnection，取决于信号发送者（Sender）和接收者（Receiver）是否在同一个线程。
     - DirectConnection
         行为：信号触发时，槽函数立即在信号发送者的线程中同步执行。
     - QueuedConnection
