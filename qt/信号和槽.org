@@ -3,6 +3,8 @@
 #+DATE: <2025-02-28 五>
 #+EMAIL: a651685099@163.com
 
+前置：[[file:信号连接方式.org][信号和槽的连接方式]]
+
 * SIGNAL 如何调用
 signal 函数被 moc 实现，最终调用 QMetaObject::activate 然后 QMetaObject::activate 调用 doActivate 。
 - 如果连接方式为 queued, 那么 doActivate 会调用 queued_activate ：
@@ -41,7 +43,7 @@ signal 函数被 moc 实现，最终调用 QMetaObject::activate 然后 QMetaObj
   }
 #+END_SRC
 
-*doActivate 调用时，会判断当前线程：*
+*doActivate 调用时，会判断当前线程（不是 object 所在的线程，而是 signal 调用所在的线程）：*
 #+BEGIN_SRC C++
   // Picked from qt src
   Qt::HANDLE currentThreadId = QThread::currentThreadId();
