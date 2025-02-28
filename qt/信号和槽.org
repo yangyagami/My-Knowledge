@@ -1,0 +1,54 @@
+#+TITLE: 信号和槽
+#+AUTHOR: Yangsiyu
+#+DATE: <2025-02-28 五>
+#+EMAIL: a651685099@163.com
+
+* SIGNAL 如何调用
+signal 函数被 moc 实现，最终调用 QMetaObject::activate 然后 QMetaObject::activate 调用 doActivate 。
+- 如果连接方式为 queued, 那么 doActivate 会调用 queued_activate ：
+#+BEGIN_SRC C++
+  // determine if this connection should be sent immediately or
+  // put into the event queue
+  if ((c->connectionType == Qt::AutoConnection && !receiverInSameThread)
+      || (c->connectionType == Qt::QueuedConnection)) {
+    queued_activate(sender, signal_index, c, argv);
+    continue;
+  }
+#+END_SRC
+
+- 如果连接方式为 blocking, 那么 doActivate 会：
+#+BEGIN_SRC C++
+  if (c->connectionType == Qt::BlockingQueuedConnection) {
+    if (receiverInSameThread) {
+      qWarning("Qt: Dead lock detected while activating a BlockingQueuedConnection: "
+	       "Sender is %s(%p), receiver is %s(%p)",
+	       sender->metaObject()->className(), sender,
+	       receiver->metaObject()->className(), receiver);
+    }
+    QSemaphore semaphore;
+    {
+      QBasicMutexLocker locker(signalSlotLock(sender));
+      if (!c->receiver.loadAcquire())
+	continue;
+      QMetaCallEvent *ev = c->isSlotObject ?
+	  new QMetaCallEvent(c->slotObj, sender, signal_index, argv, &semaphore) :
+	  new QMetaCallEvent(c->method_offset, c->method_relative, c->callFunction,
+			     sender, signal_index, argv, &semaphore);
+      QCoreApplication::postEvent(receiver, ev);
+    }
+    semaphore.acquire();
+    continue;
+  }
+#+END_SRC
+
+*doActivate 调用时，会判断当前线程：*
+#+BEGIN_SRC C++
+  // Picked from qt src
+  Qt::HANDLE currentThreadId = QThread::currentThreadId();
+  bool inSenderThread = currentThreadId == QObjectPrivate::get(sender)->threadData.loadRelaxed()->threadId.loadRelaxed();
+#+END_SRC
+
+* SLOT 被谁调用
+- 同线程两个对象连接 signal 和 slot, slot 被 doActivate 调用。
+- 不同线程两个对象连接 signal 和 slot, slot 被 event 调用。
+- Inherited QThread, 同线程两个对象连接 signal 和 slot, slot 被 event 调用。

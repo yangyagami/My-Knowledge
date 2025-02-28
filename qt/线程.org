@@ -31,3 +31,53 @@ Unlike queued slots or invoked methods, methods called directly on the QThread o
     workerThread->start();
   }
 #+END_SRC
+
+*moveToThread 会改变对象所属的线程*
+#+BEGIN_SRC C++
+  class Worker : public QObject
+  {
+    Q_OBJECT
+
+   public slots:
+    void doWork(const QString &parameter) {
+      QString result;
+      /* ... here is the expensive or blocking operation ... */
+      emit resultReady(result);
+    }
+
+   signals:
+    void resultReady(const QString &result);
+  };
+
+  class Controller : public QObject
+  {
+    Q_OBJECT
+    QThread workerThread;
+   public:
+    Controller() {
+      Worker *worker = new Worker;
+      qDebug() << thread() << worker->thread() << workerThread.thread();
+      worker->moveToThread(&workerThread);
+      qDebug() << thread() << worker->thread() << workerThread.thread();
+      /*
+	output:
+	QThread(0x6020000060d0) QThread(0x6020000060d0) QThread(0x6020000060d0)
+	QThread(0x6020000060d0) QThread(0x7ffd871d1aa0) QThread(0x6020000060d0)
+      ,*/
+      connect(&workerThread, &QThread::finished, worker, &QObject::deleteLater);
+      connect(this, &Controller::operate, worker, &Worker::doWork);
+      connect(worker, &Worker::resultReady, this, &Controller::handleResults);
+      workerThread.start();
+    }
+    ~Controller() {
+      workerThread.quit();
+      workerThread.wait();
+    }
+   public slots:
+    void handleResults(const QString &) {
+      qDebug() << "Received result";
+    }
+   signals:
+    void operate(const QString &);
+  };
+#+END_SRC
