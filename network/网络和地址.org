@@ -17,3 +17,40 @@ Machine                                     Machine
      Read <------------------------------ Write
 
 * 四层网络模型
+| Application | 应用层               |
+| Transport   | 传输层               |
+| Network     | 网络层               |
+| Link        | 链路层（以太网、无线） |
+
+** 网络层
+*如果我们用网络层，那么一定用 IP 协议。*
+TCP   UDP   RTP
+       IP
+以太网 无线网 4G 5G
+
+网络层数据包：[DATA][FROM][TO]
+数据传输：
+- 发送：Application -> Transport -> Network -> Link
+- 接受：Link -> Network -> Transport -> Application
+
+网络层 must 使用 *互联网协议（Internet Protocol）* ，也就是 IP 。
+- IP 协议负责把数据包发送到目的地，但是不做任何保证。
+- 数据包可能会丢失、乱序、损坏。
+
+** 传输层
+传输层协议有 TCP/IP （Transmission Control Protocol） 、UDP （User Datagram Protocol）。
+- TCP 保证数据包完整、正确，并且按顺序传递到接收端。如果数据有丢失，TCP 会多次尝试发送。
+- UDP 不做保证。
+- 等等。
+
+** 应用层
+App 有自己的协议，比如 HTTP 。
+
+* 七层网络模型（Open Systems Interconnection, OSI)
+| Application  |  Application |
+| Presentation |              |
+| Session      |  Transport   |
+| Transport    |              |
+| Network      |  Network     |
+| Link         |  Link        |
+| Physical     |              |
