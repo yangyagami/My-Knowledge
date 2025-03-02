@@ -6,11 +6,11 @@
 计算机网络可以认为是一个 *双向管道（读和写）* 。
 
 * 网络程序
-- 通过网络进行读写。
-- 主要模型：双向的、可靠的字节流连接。
-  - 一端负责读取，剩余的则是写入。
-  - 双向的。
-  - 可靠的（除非连接断开）。
+  - 通过网络进行读写。
+  - 主要模型：双向的、可靠的字节流连接。
+    - 一端负责读取，剩余的则是写入。
+    - 双向的。
+    - 可靠的（除非连接断开）。
 
      Write -----------------------------> Read
 Machine                                     Machine
@@ -30,18 +30,18 @@ TCP   UDP   RTP
 
 网络层数据包：[DATA][FROM][TO]
 数据传输：
-- 发送：Application -> Transport -> Network -> Link
-- 接受：Link -> Network -> Transport -> Application
+  - 发送：Application -> Transport -> Network -> Link
+  - 接受：Link -> Network -> Transport -> Application
 
 网络层 must 使用 *互联网协议（Internet Protocol）* ，也就是 IP 。
-- IP 协议负责把数据包发送到目的地，但是不做任何保证。
-- 数据包可能会丢失、乱序、损坏。
+  - IP 协议负责把数据包发送到目的地，但是不做任何保证。
+  - 数据包可能会丢失、乱序、损坏。
 
 ** 传输层
 传输层协议有 TCP/IP （Transmission Control Protocol） 、UDP （User Datagram Protocol）。
-- TCP 保证数据包完整、正确，并且按顺序传递到接收端。如果数据有丢失，TCP 会多次尝试发送。
-- UDP 不做保证。
-- 等等。
+  - TCP 保证数据包完整、正确，并且按顺序传递到接收端。如果数据有丢失，TCP 会多次尝试发送。
+  - UDP 不做保证。
+  - 等等。
 
 ** 应用层
 App 有自己的协议，比如 HTTP 。
@@ -54,3 +54,44 @@ App 有自己的协议，比如 HTTP 。
 | Network      |  Network     |
 | Link         |  Link        |
 | Physical     |              |
+
+* IP 协议
+链路层数据报文格式：[Link Data][Link Hdr]。
+IP 协议数据报文格式：[IP Data][IP Hdr]。
+传输层数据报文格式：[Data][Hdr]。
+
+*上层数据报文发送给下层的数据段。*
+[Data][Hdr] （Transport Segment)
+     |
+     to
+[IP Data（Transport Segment)][IP Hdr]
+     |
+     to
+[Link Data （IP Segment）            ][Link Hdr]
+
+IP 协议可以由 4 个属性描述：
+| Property       | Behavior            |
+| Datagram       | 独立的路由包，逐跳路由 |
+| Unreliable     | 数据包可能被丢弃      |
+| Best effort    | 必要时，会丢弃数据     |
+| Connectionless | 无状态、无连接        |
+
+IP 协议可以类比物流服务。数据像快递一样，逐跳到达目的地。
+
+*为什么 IP 服务如此简单*:
+  - 更快、低成本、更好维护。
+  - 端到端原则：尽可能让目标端实现更多功能，而不是网络。
+  - 允许在其上构建可靠或不可靠的协议。（TCP/IP 、UDP）。
+  - IP 在任何链路层上都可以工作（因为协议简单，很好实现）。
+
+** IP 服务模型（详细）
+IP 协议还是做了一些事情：
+  1. IP 协议会阻止报文循环。（路由器的转发表可能出错，会导致数据报文在同一路径循环。）
+     - IP 在 Header 有一个 TTL(Time to live) 字段，它从 128 这样的数字开始，每经过一个路由器就会递减，如果为 0, 就丢弃这个数据包。
+  2. 数据包如果过长，会分段。
+  3. IP Header 有一个校验和，确保报文到达正确目的地。
+  4. 现今有两个版本协议：IPv4(32 bit) 、IPv6(128 bit)
+  5. IP 头部可以添加新选项。
+
+[[./ipv4 datagram.PNG]]
+
