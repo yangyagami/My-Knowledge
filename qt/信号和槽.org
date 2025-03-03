@@ -51,6 +51,5 @@ signal 函数被 moc 实现，最终调用 QMetaObject::activate 然后 QMetaObj
 #+END_SRC
 
 * SLOT 被谁调用
-- 同线程两个对象连接 signal 和 slot, slot 被 doActivate 调用。
-- 不同线程两个对象连接 signal 和 slot, slot 被 event 调用。
-- Inherited QThread, 同线程两个对象连接 signal 和 slot, slot 被 event 调用。
+- 如果信号调用线程和接受者是同一个线程，那么 slot 被 doActivate 调用。
+- 如果信号调用线程和接受者不是同一个线程，那么 slot 被 event 调用。
