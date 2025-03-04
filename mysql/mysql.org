@@ -14,12 +14,19 @@
 
 ** 表
 *每个数据库的每个表的名字是唯一的。*
-*PRIMARY KEY 表示唯一，而且一定不能为空。*
+*PRIMARY KEY 表示唯一，而且一定不能为空。每个表只能有一个主键*
 #+BEGIN_SRC sql
   CREATE TABLE 表格名(
       列名1 INT AUTO_INCREMENT PRIMARY KEY,
       列名2 VARCHAR() NOT NULL,
       列名3 DATE NULL
+  );
+  # 或者
+  CREATE TABLE 表格名(
+      列名1 INT AUTO_INCREMENT,
+      列名2 VARCHAR() NOT NULL,
+      列名3 DATE NULL,
+      PRIMARY KEY (列名1)
   );
 #+END_SRC
 
