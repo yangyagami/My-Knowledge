@@ -73,14 +73,14 @@
 
 ** 更改表中的值
 #+BEGIN_SRC sql
-  UPDATE TABLE 数据库名.表名
+  UPDATE 数据库名.表名
   SET 数值
   WHERE 条件;
 #+END_SRC
 
 设置 id == 3 的行的出生日期：
 #+BEGIN_SRC sql
-  UPDATE TABLE test.record
+  UPDATE test.record
   SET birth_date = '2000-02-26'
   WHERE id = 3;
 #+END_SRC
@@ -94,8 +94,123 @@
   WHERE 条件;
 #+END_SRC
 
-删除 id = 1 的那一条数据：
+删除 id == 1 的那一条数据：
 #+BEGIN_SRC sql
   DELETE FROM test.record
   WHERE id = 1;
+#+END_SRC
+
+** 删除表
+#+BEGIN_SRC sql
+  DROP TABLE 数据库名.表名;
+#+END_SRC
+
+#+BEGIN_SRC sql
+  DROP TABLE test.record;
+#+END_SRC
+
+** 删除数据库
+#+BEGIN_SRC sql
+  DROP DATABASE 数据库名;
+#+END_SRC
+
+#+BEGIN_SRC sql
+  DROP DATABASE test;
+#+END_SRC
+
+* 查询
+** 表查询
+#+BEGIN_SRC sql
+  SELECT * FROM 表名;
+  SELECT 列名1, 列名2 FROM 表名;
+#+END_SRC
+
+查看表格全部数据:
+#+BEGIN_SRC sql
+  SELECT * FROM Egg_database.Covid_month;
+#+END_SRC
+
+查看指定的数据:
+#+BEGIN_SRC sql
+  SELECT Country, Confirmed, Continent FROM Egg_database.Covid_month;
+#+END_SRC
+
+*** 查询不同的数值
+#+BEGIN_SRC sql
+  SELECT DISTINCT 列名1 FROM 表名;
+#+END_SRC
+
+例如：
+#+BEGIN_SRC sql
+  SELECT DISTINCT Continent FROM Egg_database.Covid_month;
+#+END_SRC
+
+*** 排序
+#+BEGIN_SRC sql
+  SELECT * FROM 表名 ORDER BY 列名;  # 默认为升序排序
+  SELECT * FROM 表名 ORDER BY 列名 ASC;  # 升序排序
+  SELECT * FROM 表名 ORDER BY 列名 DESC;  # 降序排序
+#+END_SRC
+
+例如：
+#+BEGIN_SRC sql
+  SELECT * FROM Egg_database.Covid_month ORDER BY Confirmed;  # 默认为升序排序
+#+END_SRC
+
+*** 条件查询
+#+BEGIN_SRC sql
+  SELECT * FROM 表名 WHERE 条件 ORDER BY 列名;  # 默认为升序排序
+  SELECT * FROM 表名 WHERE 条件 ORDER BY 列名 ASC;  # 升序排序
+  SELECT * FROM 表名 WHERE 条件 ORDER BY 列名 DESC;  # 降序排序
+#+END_SRC
+
+- 比较运算符
+| =       | 等于      |
+| != 或 <> | 不等于     |
+| >       | 大于      |
+| <       | 小于      |
+| >=      | 大于等于   |
+| <=      | 小于等于   |
+| BETWEEN | 两数值之间，闭合区间 |
+| IN      | 一组数值里 |
+| LIKE    | 相似匹配   |
+
+- 逻辑运算符
+| AND     | 与 |
+| OR      | 或 |
+| NOT 或 ! | 非 |
+
+例如，查询康复数量大于等于 1000000 的：
+#+BEGIN_SRC sql
+  SELECT * FROM Egg_database.Covid_month
+  WHERE Recovered >= 1000000
+  ORDER BY Confirmed DESC;  # 降序排序
+#+END_SRC
+
+查询康复数量大于等于 1000000 的，并且国家不是 Brazil 的：
+#+BEGIN_SRC sql
+  SELECT * FROM Egg_database.Covid_month
+  WHERE Recovered >= 1000000 AND Country != 'Brazil'
+  ORDER BY Confirmed DESC;  # 降序排序
+#+END_SRC
+
+查询康复数量小于 1000000 的，并且国家不是 Brazil 的：
+#+BEGIN_SRC sql
+  SELECT * FROM Egg_database.Covid_month
+  WHERE NOT Recovered >= 1000000 AND Country != 'Brazil'
+  ORDER BY Confirmed DESC;  # 降序排序
+#+END_SRC
+
+查询康复数量 >= 1000000 && <= 1200000 的：
+#+BEGIN_SRC sql
+  SELECT * FROM Egg_database.Covid_month
+  WHERE Recovered BETWEEN 1000000 AND 1200000
+  ORDER BY Confirmed DESC;  # 降序排序
+#+END_SRC
+
+查询国家在 Brazil 和 India 里面的：
+#+BEGIN_SRC sql
+  SELECT * FROM Egg_database.Covid_month
+  WHERE Country IN ('Brazil', 'India')
+  ORDER BY Confirmed;
 #+END_SRC
