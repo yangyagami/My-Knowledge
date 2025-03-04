@@ -1,0 +1,101 @@
+#+TITLE: mysql
+#+AUTHOR: Yangsiyu
+#+DATE: <2025-03-03 一>
+#+EMAIL: a651685099@163.com
+
+* 创建
+** 数据库
+*数据库名字是唯一的。*
+#+BEGIN_SRC sql
+    CREATE DATABASE 数据库名字;
+    USE 数据库名字;
+#+END_SRC
+
+** 表
+*每个数据库的每个表的名字是唯一的。*
+*PRIMARY KEY 表示唯一，而且一定不能为空。*
+#+BEGIN_SRC sql
+  CREATE TABLE 表格名(
+      列名1 INT AUTO_INCREMENT PRIMARY KEY,
+      列名2 VARCHAR() NOT NULL,
+      列名3 DATE NULL
+  );
+#+END_SRC
+
+** 插入
+#+BEGIN_SRC sql
+  INSERT INTO 数据库名.表名(
+      列名1,
+      列名2,
+      列名3
+  )
+  VALUES (
+      数值1,
+      数值2,
+      数值3
+  );
+#+END_SRC
+
+例如，这里创建一个 test 数据库，然后创建一个 record 表：
+#+BEGIN_SRC sql
+  CREATE DATABASE test;
+  USE test;
+
+  CREATE TABLE record (
+      id INT PRIMARY KEY AUTO_INCREMENT,
+      name varchar(32) NOT NULL,
+      age INT NOT NULL,
+      birth_date DATE NULL
+  );
+
+  insert into test.record (id, name, age, birth_date)
+  values (1, 'Kitty', 23, '2000-03-26');
+
+  insert into test.record
+  values (2, 'John', 25, '2000-02-26');
+
+  insert into test.record
+  values (DEFAULT, 'Yang', 25, NULL);
+#+END_SRC
+
+* 更新
+** 新增列
+#+BEGIN_SRC sql
+  ALTER TABLE 数据库名.表名
+  ADD 列名 数据类型 默认条件;
+#+END_SRC
+
+现在假设要给 record 表新增加一个 gender 列：
+#+BEGIN_SRC sql
+  ALTER TABLE test.record
+  ADD gender VARCHAR(10) NOT NULL;
+#+END_SRC
+
+** 更改表中的值
+#+BEGIN_SRC sql
+  UPDATE TABLE 数据库名.表名
+  SET 数值
+  WHERE 条件;
+#+END_SRC
+
+设置 id == 3 的行的出生日期：
+#+BEGIN_SRC sql
+  UPDATE TABLE test.record
+  SET birth_date = '2000-02-26'
+  WHERE id = 3;
+#+END_SRC
+
+*在 sql 的不同上下文下， '=' 有赋值和比较两种意思。*
+
+* 删除
+** 删除一条数据
+#+BEGIN_SRC sql
+  DELETE FROM 数据库名.表名
+  WHERE 条件;
+#+END_SRC
+
+删除 id = 1 的那一条数据：
+#+BEGIN_SRC sql
+  DELETE FROM test.record
+  WHERE id = 1;
+#+END_SRC
