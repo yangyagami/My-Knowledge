@@ -176,3 +176,5 @@ traceroute to www.baidu.com (110.242.70.57), 30 hops max, 60 byte packets
   - 分离关注点
   - 持续改进
   - 点对点通信（针对网络）
+
+* 内存、字节序、包格式
