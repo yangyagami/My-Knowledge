@@ -7,7 +7,7 @@
 
 * 网络程序
   - 通过网络进行读写。
-  - 主要模型：双向的、可靠的字节流连接。（底层实际没有连接这种东西）
+  - 主要模型：双向的、可靠的字节流连接。（底层实际没有链接这种东西）
     - 一端负责读取，剩余的则是写入。
     - 双向的。
     - 可靠的（除非连接断开）。
@@ -17,10 +17,10 @@ Machine                                     Machine
      Read <------------------------------ Write
 
 * 四层网络模型
-| Application | 应用层 (HTTP, HTTPS, WebSocket |
-| Transport   | 传输层 (TCP/IP, UDP)           |
-| Network     | 网络层（IP 协议）               |
-| Link        | 链路层（以太网、无线）           |
+| Application | 应用层 (HTTP，HTTPS，WebSocket) |
+| Transport   | 传输层 (TCP/IP，UDP)            |
+| Network     | 网络层 (IP 协议)                |
+| Link        | 链路层 (以太网、无线)           |
 
 ** 网络层
 *如果我们用网络层，那么一定用 IP 协议。*
@@ -70,11 +70,12 @@ IP 协议数据报文格式：[IP Data][IP Hdr]。
 [Link Data （IP Segment）            ][Link Hdr]
 
 IP 协议可以由 4 个属性描述：
-| Property       | Behavior            |
+| Property       | Behavior              |
+|----------------+-----------------------|
 | Datagram       | 独立的路由包，逐跳路由 |
-| Unreliable     | 数据包可能被丢弃      |
+| Unreliable     | 数据包可能被丢弃       |
 | Best effort    | 必要时，会丢弃数据     |
-| Connectionless | 无状态、无连接        |
+| Connectionless | 无状态、无连接         |
 
 IP 协议可以类比物流服务。数据像快递一样，逐跳（HOP）到达目的地。
 
@@ -156,3 +157,22 @@ traceroute to www.baidu.com (110.242.70.57), 30 hops max, 60 byte packets
 28  * * *
 29  * * *
 30  * * *
+
+* Packet Switching
+定义：
+  - Packet 是一个包含自身数据的单元，它携带到达目的地所需要的信息。
+  - Packet Switching 是指为每个到达的数据包， *分别* 选择它的出站链路，如果链路是闲置的，那么发送它，否则，延迟发送。
+  - Packet Switching 的思想是将数据分解成离散的，自包含的数据块。
+
+优点：
+  - 交换机可以对每个数据包进行独立的本地决策。
+  - 高效共享链路。
+
+* Layering
+优点：
+  - 模块化
+  - 好的定义
+  - 可重用
+  - 分离关注点
+  - 持续改进
+  - 点对点通信（针对网络）
