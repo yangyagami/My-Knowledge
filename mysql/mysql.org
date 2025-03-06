@@ -127,6 +127,12 @@
 #+END_SRC
 
 * 查询
+** 查询数据库
+#+BEGIN_SRC sql
+  show DATABASES;
+  use 数据库名;
+  show TABLES;
+#+END_SRC
 ** 表查询
 #+BEGIN_SRC sql
   SELECT * FROM 表名;
