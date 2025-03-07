@@ -1,0 +1,99 @@
+#+TITLE: 语言可用性的强化
+#+DATE: <2025-03-07 五>
+#+AUTHOR: yangsiyu
+
+* 常量
+** nullptr
+nullptr 出现的目的是为了替代 NULL。 C 与 C++ 语言中有空指针常量，它们能被隐式转换成任何指针类型的空指针值，或 C++ 中的任何成员指针类型的空成员指针值。 NULL 由标准库实现提供，并被定义为实现定义的空指针常量。在 C 中，有些标准库会把 NULL 定义为 ((void*)0) 而有些将它定义为 0。
+
+C++ 不允许直接将 void * 隐式转换到其他类型，从而 ((void*)0) 不是 NULL 的合法实现。例如：
+#+begin_src C++
+  int main() {
+    void *t;
+    char *ch = t;
+    return 0;
+  }
+  /*
+    user$: g++ main.cc -Wall -Werror -o main
+
+    main.cc: In function ‘int main()’:
+    main.cc:10:14: 错误：invalid conversion from ‘void*’ to ‘char*’ [-fpermissive]
+    10 |   char *ch = t;
+    |              ^
+    |              |
+    |              void*
+    main.cc:10:9: 错误：unused variable ‘ch’ [-Werror=unused-variable]
+    10 |   char *ch = t;
+    |         ^~
+    cc1plus：所有的警告都被当作是错误
+  ,*/
+#+end_src
+
+因此如果把 NULL 定义为 ((void*)0), 那么下面的本来正常的代码就会出错：
+#+begin_src C++
+  char *ch = NULL;
+#+end_src
+
+没有了 void * 隐式转换的 C++ 只好将 NULL 定义为 0。而这依然会产生新的问题，将 NULL 定义成 0 将导致 C++ 中重载特性发生混乱。考虑下面这两个 foo 函数：
+#+begin_src C++
+  void foo(char*);
+  void foo(int);
+#+end_src
+
+那么 foo(NULL); 这个语句将会去调用 foo(int)，从而导致代码违反直觉。
+
+为了解决这个问题，C++11 引入了 nullptr 关键字，专门用来区分空指针、0。 *而 nullptr 的类型为 nullptr_t，能够隐式的转换为任何指针或成员指针的类型，也能和他们进行相等或者不等的比较。*
+
+下面代码展示了 NULL 和 0 和 ((void*)0) 和 nullptr 之间的关系：
+#+begin_src C++
+  #include <iostream>
+  #include <type_traits>
+
+  void foo(char *);
+  void foo(int);
+
+  int main() {
+    if (std::is_same<decltype(NULL), decltype(0)>::value)
+      std::cout << "NULL == 0" << std::endl;
+    if (std::is_same<decltype(NULL), decltype((void*)0)>::value)
+      std::cout << "NULL == (void *)0" << std::endl;
+    if (std::is_same<decltype(NULL), std::nullptr_t>::value)
+      std::cout << "NULL == nullptr" << std::endl;
+
+    foo(0);          // 调用 foo(int)
+    // foo(NULL);    // 该行不能通过编译
+    foo(nullptr);    // 调用 foo(char*)
+    return 0;
+  }
+
+  void foo(char *) {
+    std::cout << "foo(char*) is called" << std::endl;
+  }
+  void foo(int i) {
+    std::cout << "foo(int) is called" << std::endl;
+  }
+#+end_src
+
+#+results:
+foo(int) is called
+foo(char*) is called
+
+如果启用 foo(NULL), g++ 会认为调用有歧义:
+#+results:
+[nix-shell:/tmp]$ g++ main.cc -Wall -Werror -o main
+main.cc: In function ‘int main()’:
+main.cc:16:6: 错误：调用重载的‘foo(NULL)’有歧义
+   16 |   foo(NULL);    // 该行不能通过编译
+      |   ~~~^~~~~~
+main.cc:4:6: 附注：备选： ‘void foo(char*)’
+    4 | void foo(char *);
+      |      ^~~
+main.cc:5:6: 附注：备选： ‘void foo(int)’
+    5 | void foo(int);
+      |      ^~~
+
+此外，在上面的代码中，我们使用了 decltype 和 std::is_same 这两个属于现代 C++ 的语法，简单来说，decltype 用于类型推导，而 std::is_same 用于比较两个类型是否相同。
+
+** constexpr
+constexpr 是常量表达式，在编译期间求值，并嵌入到程序里，没有任何副作用。
+*const 和 constexpr 都会分配内存。* 对于数组长度，必须是一个常量表达式， *而 const 不可以* 。

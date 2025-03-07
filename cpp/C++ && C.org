@@ -1,0 +1,44 @@
+#+TITLE: C++ && C
+#+DATE: <2025-03-07 五>
+#+AUTHOR: yangsiyu
+
+在不得不使用 C 时，应该注意使用 extern "C" 这种特性，将 C 语言的代码与 C++代码进行分离编译，再统一链接这种做法，例如：
+#+begin_src C++
+  // foo.h
+  #ifdef __cplusplus
+  extern "C" {
+  #endif
+
+    int add(int x, int y);
+
+  #ifdef __cplusplus
+  }
+  #endif
+
+  // foo.c
+  int add(int x, int y) {
+    return x+y;
+  }
+
+  // 1.1.cpp
+  #include "foo.h"
+  #include <iostream>
+  #include <functional>
+
+  int main() {
+    [out = std::ref(std::cout << "Result from C code: " << add(1, 2))](){
+      out.get() << ".\n";
+    }();
+    return 0;
+  }
+#+end_src
+
+应先使用 gcc 编译 C 语言的代码：
+#+begin_src shell
+  gcc -c foo.c
+#+end_src
+
+编译出 foo.o 文件，再使用 clang++ 将 C++ 代码和 .o 文件链接起来（或者都编译为 .o 再统一链接）：
+#+begin_src shell
+  clang++ 1.1.cpp foo.o -std=c++2a -o 1.1
+#+end_src
