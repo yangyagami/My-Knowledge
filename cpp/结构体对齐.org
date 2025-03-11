@@ -3,7 +3,7 @@
 #+AUTHOR: yangsiyu
 
 * 规则
-- Before each individual member, there will be padding so that to make it start at an address that is divisible by its alignment requirement. E.g., on many systems, an 'int' should start at an address divisible by 4 and a short by 2.
+- *Before each individual member, there will be padding so that to make it start at an address that is divisible by its alignment requirement.* E.g., on many systems, an 'int' should start at an address divisible by 4 and a short by 2.
 - 'char' and 'char[]' are special, could be any memory address, so they don't need padding before them.
 - For 'struct', other than the alignment need for each individual member, the size of whole struct itself will be aligned to a size divisible by strictest alignment requirement of any of its members, by padding at end. E.g., on many systems, if struct's largest member is int then by divisible by 4, if short then by 2.
 
