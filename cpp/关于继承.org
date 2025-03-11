@@ -1,0 +1,42 @@
+#+TITLE: 关于继承
+#+DATE: <2025-03-11 二>
+#+AUTHOR: yangsiyu
+
+| 继承方式  | 基类的 public 成员 | 基类的 protected 成员 | 基类的 private 成员 |
+| public    | 在子类是 public    | 在子类是 protected    | 在子类不可见        |
+| protected | 在子类是 protected | 在子类是 protected    | 在子类不可见        |
+| private   | 在子类是 private   | 在子类是 private      | 在子类不可见        |
+
+例如：
+- 以 protected / private 方式继承
+  #+begin_src C++
+    #include <iostream>
+
+    class Base {
+     public:
+      void Hello() {
+        std::cout << "Base hello" << std::endl;
+      }
+    };
+
+    class Derived : protected /* private */ Base {
+    };
+
+    int main() {
+      Derived test;
+      test.Hello();
+      return 0;
+    }
+  #+end_src
+  
+  #+results:
+  main.cc: In function ‘int main()’:
+  main.cc:15:13: 错误：‘void Base::Hello()’ is inaccessible within this context
+  15 |   test.Hello();
+  |   ~~~~~~~~~~^~
+  main.cc:5:8: 附注：在此声明
+  5 |   void Hello() {
+  |        ^~~~~
+  main.cc:15:13: 错误：‘Base’是‘Derived’的一个不可访问的基类
+  15 |   test.Hello();
+  |   ~~~~~~~~~~^~
