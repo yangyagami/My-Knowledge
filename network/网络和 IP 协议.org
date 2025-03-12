@@ -178,3 +178,11 @@ traceroute to www.baidu.com (110.242.70.57), 30 hops max, 60 byte packets
   - 点对点通信（针对网络）
 
 * 内存、字节序、包格式
+x86 处理器通常是小端，arm 处理器通常是大端。
+*网络字节序是大端。*
+
+有一些辅助函数可以转换字节序：
+  short 类型（host to network short）：
+    htons()、ntohs()
+  int 类型（host to network long）：
+    htonl()、ntohl()
