@@ -1,0 +1,44 @@
+#+TITLE: 构造函数
+#+DATE: <2025-03-22 六>
+#+AUTHOR: yangsiyu
+
+* 默认构造函数
+- 如果一个类没有写 *任何* 构造函数，那么编译器会为这个类生成一个默认的构造函数。
+- 子类如果实现了构造函数，父类构造也会被隐藏。
+#+begin_src C++
+  #include <iostream>
+  #include <format>
+  #include <string>
+
+  class Base {
+   public:
+    Base() {}
+    Base(const Base &other) {
+      std::cout << "base copy constructor\n";
+    }
+  };
+
+  class Derived : public Base {
+   public:
+    Derived(const Derived &other) {
+      std::cout << "derived copy constructor\n";
+    }
+  };
+
+  int main() {
+    Derived other;
+    Derived derived = other;
+    return 0;
+  }
+#+end_src
+
+#+results
+[nix-shell:/tmp]$ g++ main.cc -o main && ./main
+main.cc: In function ‘int main()’:
+main.cc:21:11: 错误：no matching function for call to ‘Derived::Derived()’
+   21 |   Derived other;
+      |           ^~~~~
+main.cc:15:3: 附注：备选： ‘Derived::Derived(const Derived&)’
+   15 |   Derived(const Derived &other) {
+      |   ^~~~~~~
+main.cc:15:3: 附注： 备选需要 1 实参，但提供了 0 个
