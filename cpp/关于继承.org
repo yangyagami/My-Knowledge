@@ -2,6 +2,7 @@
 #+DATE: <2025-03-11 二>
 #+AUTHOR: yangsiyu
 
+* 继承方式
 | 继承方式  | 基类的 public 成员 | 基类的 protected 成员 | 基类的 private 成员 |
 | public    | 在子类是 public    | 在子类是 protected    | 在子类不可见        |
 | protected | 在子类是 protected | 在子类是 protected    | 在子类不可见        |
@@ -40,3 +41,34 @@
   main.cc:15:13: 错误：‘Base’是‘Derived’的一个不可访问的基类
   15 |   test.Hello();
   |   ~~~~~~~~~~^~
+
+* 函数隐藏
+如果父类函数不为虚函数，那么子类如果有同名函数，会把父类函数隐藏。
+#+begin_src C++
+  #include <iostream>
+  #include <format>
+  #include <string>
+
+  class Base {
+   public:
+    void func(int a) {
+      std::cout << "Base " << __func__ << std::endl;
+    }
+    void func(const char *str) {
+      std::cout << "Base " << __func__ << std::endl;
+    }
+  };
+
+  class Derived : public Base {
+   public:
+    int func(double a) {
+      std::cout << "Derived " << __func__ << std::endl;
+    }
+  };
+
+  int main() {
+    Derived derived;
+    derived.func("hello");  // 编译错误：cannot convert ‘const char [6]’ to ‘double’
+    return 0;
+  }
+#+end_src
