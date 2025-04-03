@@ -18,11 +18,8 @@ Qt 提供了 5 种连接方式（通过 Qt::ConnectionType 枚举定义）：
         行为：与 AutoConnection 类似，但确保同一信号和槽之间仅有一个连接（防止重复连接）。
 
 2. Qt 如何自动选择连接方式（AutoConnection）
-当使用默认的 Qt::AutoConnection 时，Qt 会通过以下逻辑判断连接方式：
-    - 发送者与接收者在同一线程
-        使用 DirectConnection（直接调用，同步执行）。
-    - 发送者与接收者在不同线程
-        使用 QueuedConnection（跨线程通信，异步执行）。
+当使用默认的 Qt::AutoConnection 时，Qt 会通过 *发送信号（emit 的时候）所在的线程* 以及对象所属线程来判断。
+
 底层实现机制
     - Qt 会检查发送者对象（sender）和接收者对象（receiver）的线程亲和性（即 *QObject::thread()* ）。
     - 如果 sender 和 receiver 的线程相同，槽函数会直接调用（无事件队列）。
