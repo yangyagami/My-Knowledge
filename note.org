@@ -1,4 +1,3 @@
-
 * C++ 读取文件内容到容器里
 [2025-06-10 二 17:09]
 #+BEGIN_SRC C++
@@ -25,4 +24,220 @@ std::string inputBuffer((std::istreambuf_iterator<char>(file)),
   	}
       }
   }  // Button($toggleWakeup)
+=======
+* HTML 创建按钮，并且监听 onclick 事件
+[2025-05-15 Thu 10:51]
+#+BEGIN_SRC js
+  const button = document.createElement('button');
+  button.innerText = '带我去';
+
+  button.onclick = function() {
+      
+  };
+#+END_SRC
+
+* HTML CSS 隐藏滚动条
+[2025-05-15 Thu 14:13]
+#+BEGIN_SRC css
+  /* 隐藏滚动条 */
+  .chat-container::-webkit-scrollbar {
+      display: none; /* 对于 WebKit 浏览器（Chrome, Safari） */
+  }
+#+END_SRC
+
+* std::shared_ptr 模板参数不用带星号。
+[2025-05-18 Sun 10:44]
+#+BEGIN_SRC C++
+std::shared_ptr<BaiduFaceApi> api_ = nullptr;
+#+END_SRC
+
+* shared_ptr 这样构造。
+[2025-05-18 Sun 10:49]
+#+BEGIN_SRC C++
+api_ = std::make_shared<BaiduFaceApi>();
+#+END_SRC
+
+* QRect 设置 Rect 。
+[2025-05-18 Sun 13:14]
+#+BEGIN_SRC C++
+  stImageResult.face_rgb_rect.setRect(
+      faces[0].left,
+      faces[0].top,
+      faces[0].right,
+      faces[0].bottom);
+#+END_SRC
+
+* QDir::homePath
+非 windows 系统下，使用 HOME 环境变量获取。
+
+* QT 绘制无线信号
+[2025-05-22 Thu 15:58]
+#+BEGIN_SRC C++
+  #ifndef RK3588_WIFI_WIFI_DELEGATE_H_
+  #define RK3588_WIFI_WIFI_DELEGATE_H_
+
+  #include <QStyledItemDelegate>
+  #include <QPainter>
+  #include <QDebug>
+  #include <QPainterPath>
+
+  #include "wifi_model.h"
+
+  class RK3588WifiDelegate : public QStyledItemDelegate {
+   public:
+    using QStyledItemDelegate::QStyledItemDelegate;
+
+    // 自定义绘制函数
+    void paint(QPainter* painter,
+               const QStyleOptionViewItem& option,
+               const QModelIndex& index) const override {
+
+      painter->save();
+
+      painter->setRenderHint(QPainter::Antialiasing);
+
+      // painter->translate(option.rect.topLeft());
+
+      // 高亮选中项的背景
+      if (option.state & QStyle::State_Selected) {
+        painter->fillRect(option.rect, QColor("#e3f2fd")); // 浅蓝色背景
+      }
+
+      // 绘制文本（左对齐，垂直居中）
+      QFont font;
+
+      font.setPointSize(12);
+
+      painter->setFont(font);
+
+      QString text = index.data(RK3588WifiModel::kSSID).toString();
+      QRect textRect = option.rect.adjusted(5, 0, -5, 0); // 左右留空5像素
+
+      painter->setPen(Qt::black);
+      painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, text);
+
+      DrawWifi(painter, option, index);
+
+      painter->restore();
+    }
+
+    // 设置项的理想大小
+    QSize sizeHint(const QStyleOptionViewItem& option,
+                   const QModelIndex& index) const override {
+      return QSize(option.widget->width(), 80);
+    }
+
+   private:
+    void DrawWifiArc(QPainter* painter, int radius, int arc_height,
+                     bool sub = true) const {
+      // Center rect. radius = rect.width / 2; also as circle's radius.
+      QRectF rect(-radius, -radius, radius << 1, radius << 1);
+
+      QPainterPath path;
+      path.arcTo(rect, 45, 90);
+
+      QPainterPath subPath;
+      subPath.addEllipse(
+          rect.adjusted(arc_height, arc_height, -arc_height, -arc_height));
+
+      if (sub) {
+        path -= subPath;
+      }
+      painter->drawPath(path);
+    }
+
+    void DrawWifi(QPainter* painter,
+                  const QStyleOptionViewItem& option,
+                  const QModelIndex& index) const {
+      int signal = index.data(RK3588WifiModel::kSignal).toInt();
+
+      QRect wifi_rect = option.rect.adjusted(
+          option.rect.width() - 120,
+          20,
+          -90,
+          -20);
+
+      const int kMaxItem = 4;
+
+      const int kRadius = wifi_rect.height() * 0.88;
+      const int kArcHeight = wifi_rect.height() / 10.5;
+
+      for (int i = 0; i < kMaxItem; ++i) {
+        if (signal >= i) {
+          // Has signal
+          painter->setPen(Qt::black);
+          painter->setBrush(Qt::black);
+        } else {
+          painter->setPen(QColor(200, 200, 200));
+          painter->setBrush(QColor(200, 200, 200));
+        }
+
+        switch (i) {
+          case 0: {
+            painter->translate(
+                QPointF(wifi_rect.x() + wifi_rect.width() * 0.5,
+                        wifi_rect.y() + wifi_rect.height() * 0.95));
+            DrawWifiArc(painter, kRadius * 0.15, kArcHeight, false);
+            break;
+          }
+          case 1:
+            DrawWifiArc(painter, kRadius * 0.4, kArcHeight);
+            break;
+          case 2:
+            DrawWifiArc(painter, kRadius * 0.7, kArcHeight);
+            break;
+          case 3:
+            DrawWifiArc(painter, kRadius, kArcHeight);
+            break;
+        }
+      }
+    }
+  };
+
+  #endif  // RK3588_WIFI_WIFI_DELEGATE_H_
+#+END_SRC
+
+* QT 遍历 QJsonArray
+[2025-05-25 Sun 11:25]
+#+BEGIN_SRC C++
+  QJsonArray json_array = doc.array();
+  for (const QJsonValue &value : json_array) {
+      qDebug() << value; // 处理每个值
+    }
+#+END_SRC
+
+* QT 图像被莫名翻转
+[2025-05-25 Sun 17:09]
+#+BEGIN_SRC C++
+  // 图片文件（如 JPEG）可能包含 EXIF 方向标签（Orientation Tag），部分图像库（如 Qt 的默认图像加载器）不会自动处理此信息，导致图像显示时方向错误。
+QImageReader reader(path);
+  reader.setAutoTransform(true); // 启用自动 EXIF 方向校正
+  QImage image = reader.read();
+#+END_SRC
+
+* QT 信号重载
+[2025-05-27 Tue 11:54]
+#+BEGIN_SRC C++
+  connect(ws_, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error),
+  [this](QAbstractSocket::SocketError error){
+              QString error_str =
+                  QMetaEnum::fromType<QAbstractSocket::SocketError>()
+                  .valueToKey(error);
+              logger_.Error(QString("Network error: %1").arg(error_str));
+              emit AiControllerStatusNotify(static_cast<int>(error) + 7000,
+                                            "Network error.");
+            });
+#+END_SRC
+
+* C++ 计算经过时间
+[2025-06-02 Mon 12:35]
+#+BEGIN_SRC C++
+  auto start = std::chrono::high_resolution_clock::now();
+  player.Write(buffer, 3000ms);
+  auto end = std::chrono::high_resolution_clock::now();
+  // 计算持续时间
+  std::chrono::duration<double> duration = end - start;
+
+  // 输出执行时间（秒）
+  std::cout << "执行时间: " << duration.count() << " 秒" << std::endl;
 #+END_SRC
