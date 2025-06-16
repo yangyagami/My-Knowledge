@@ -1,0 +1,28 @@
+
+* C++ 读取文件内容到容器里
+[2025-06-10 二 17:09]
+#+BEGIN_SRC C++
+std::string inputBuffer((std::istreambuf_iterator<char>(file)),
+                          std::istreambuf_iterator<char>());
+#+END_SRC
+
+* qml 监听并且设置快捷键
+[2025-06-11 三 15:57]
+#+BEGIN_SRC qml
+  Button {
+      id: toggleWakeup
+      anchors.right: parent.right
+      anchors.verticalCenter: parent.verticalCenter
+      text: "点击我或按 Ctrl+S"
+      onClicked: {
+  	toggleWakeup.text = "按钮被点击或 Ctrl+S 被按下";
+      }
+
+      Keys.onPressed: {
+  	if (event.modifiers & Qt.ControlModifier && event.key === Qt.Key_S) {
+  	    toggleWakeup.text = "你按下了 Ctrl+S";
+  	    event.accepted = true;
+  	}
+      }
+  }  // Button($toggleWakeup)
+#+END_SRC
