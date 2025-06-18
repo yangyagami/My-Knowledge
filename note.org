@@ -203,7 +203,7 @@ api_ = std::make_shared<BaiduFaceApi>();
   QJsonArray json_array = doc.array();
   for (const QJsonValue &value : json_array) {
       qDebug() << value; // 处理每个值
-    }
+  }
 #+END_SRC
 
 * QT 图像被莫名翻转
@@ -240,4 +240,103 @@ QImageReader reader(path);
 
   // 输出执行时间（秒）
   std::cout << "执行时间: " << duration.count() << " 秒" << std::endl;
+#+END_SRC
+
+* QT 读取目录下的文件
+[2025-06-16 一 14:16]
+#+BEGIN_SRC C++
+  QDir dir("/usr/share/applications");
+  if (!dir.exists()) {
+    qDebug() << "目录不存在";
+    return -1;
+  }
+
+  QStringList filters;
+  filters << "*.desktop"; // 只处理 .desktop 文件
+  QFileInfoList files = dir.entryInfoList(filters, QDir::Files);
+
+  QVector<DesktopFile*> desktop_files;
+
+  for (const QFileInfo &fileInfo : files) {
+    qDebug() << "解析文件:" << fileInfo.filePath();
+    DesktopFile *desktopfile = new DesktopFile;
+    if (desktopfile->Parse(fileInfo.filePath())) {
+      desktop_files.push_back(desktopfile);
+    }
+  }
+#+END_SRC
+
+* qml listview 自动滚动
+[2025-06-18 三 14:17]
+#+BEGIN_SRC qml
+  ListView {
+      id: listmodelId
+      width: parent.width
+      height: parent.height * 0.6
+
+      clip: true
+
+      onCountChanged: Qt.callLater(scrollToBottom)
+
+      function scrollToBottom() {
+    	    if (count > 0) {
+    		positionViewAtEnd()
+    	    }
+      }
+
+      onContentHeightChanged: Qt.callLater(scrollToBottom)  // 滚动时这个也会变化
+
+      spacing: 10
+      model: g_chatWindowModel.chatModel
+      delegate: CusItemRect {
+    	    id: cusitemRectid
+
+    	    itemImgemodel: chatMsgImage
+    	    msgText: chatMsgConten
+    	    itemUrlmodel: chatMsgUrl
+    	    isSelf: chatMsgIsSelf
+
+    	    onHeightChanged: {
+    		listmodelId.scrollToBottom()
+    	    }
+      }
+
+      ScrollBar.vertical: ScrollBar {
+    	id: vbar
+    	policy: ScrollBar.AsNeeded
+    	width: 10
+
+    	contentItem: Rectangle {
+              implicitWidth: 6
+              radius: 4
+              color: vbar.pressed ? "#6c6c6c" : (vbar.hovered ? "#9a9a9a" : "#c4c4c4")
+              Behavior on color {
+    		ColorAnimation {
+                      duration: 100
+    		}  // ColorAnimation
+              }
+    	}  // Rectangle
+
+    	background: Rectangle {
+              implicitWidth: 10
+              color: "#f0f0f0"
+    	}  // Rectangle
+      }  // ScrollBar($vbar)
+  }  // ListViw($listmodelId)
+
+  // 控制是否自动滚动（例如用户手动滚动时禁用）
+  property bool autoScroll: true
+
+  function scrollToBottom() {
+      if (autoScroll && count > 0) {
+          positionViewAtEnd()
+      }
+  }
+
+  // 用户交互时暂停自动滚动
+  onMovementStarted: autoScroll = false
+  onMovementEnded: {
+      // 如果在底部附近则恢复自动滚动
+      autoScroll = (contentY >= contentHeight - height - 20)
+  }
 #+END_SRC
