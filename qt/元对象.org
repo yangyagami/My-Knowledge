@@ -1,0 +1,5 @@
+#+TITLE: 元对象.org
+#+DATE: <2025-06-21 六>
+#+AUTHOR: yangsiyu
+
+Adding a Q_DECLARE_METATYPE() makes the type known to all template based functions, including QVariant. Note that if you intend to use the type in queued signal and slot connections or in QObject's property system, you also have to call qRegisterMetaType() since the names are resolved at runtime.

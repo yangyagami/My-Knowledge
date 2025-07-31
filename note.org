@@ -340,3 +340,310 @@ QImageReader reader(path);
       autoScroll = (contentY >= contentHeight - height - 20)
   }
 #+END_SRC
+
+* CMake 根据构建模式来设置不同的编译选项
+[2025-06-20 五 14:20]
+#+BEGIN_SRC cmake
+  target_compile_options(${PROJECT_NAME} PRIVATE
+    -Wall -Wextra
+    $<$<CONFIG:Debug>:-O0>
+    $<$<CONFIG:Release>:-O2>
+  )
+
+  target_link_libraries(${PROJECT_NAME}
+    PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick Qt${QT_VERSION_MAJOR}::Multimedia Qt${QT_VERSION_MAJOR}::Network
+    $<$<CONFIG:Debug>:-fsanitize=address>)
+  #+END_SRC
+
+* Qt invokeMethod 使用示例
+[2025-06-20 五 14:31]
+#+BEGIN_SRC C++
+  QMetaObject::invokeMethod(dynamic_cast<PrinterFinderWorker*>(worker_),
+                            &PrinterFinderWorker::GetPrinterInfoList);
+#+END_SRC
+
+* 热重载 qml 的方法，以及可分别设置圆角方法（Qt5)
+[2025-06-21 六 18:43]
+#+BEGIN_SRC qml
+  使用 qmlpreview
+  Window {
+      width: 640
+      height: 800
+      visible: true
+      title: qsTr("Hello World")
+      flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Popup
+
+      Canvas {
+  	id: canvas
+  	width: parent.width - 40
+  	height: 60
+  	x: 20
+  	y: 80
+  	property var color: Qt.rgba(0, 1, 1, 1)
+  	property var radius: [20, 20, 0, 0]  // topLeft topRight bottomLeft bottomRight
+  	onPaint:{
+              var ctx = canvas.getContext("2d")
+
+  	    ctx.beginPath(); 
+  	    ctx.moveTo(0, radius[2]);
+  	    ctx.lineTo(0, height - radius[2]);
+  	    ctx.arcTo(0, height, radius[2], height, radius[2])
+  	    ctx.lineTo(width - radius[3], height)
+  	    ctx.arcTo(width, height, width, height - radius[3], radius[3])
+  	    ctx.lineTo(width, radius[1])
+  	    ctx.arcTo(width, 0, width - radius[1], 0, radius[1])
+  	    ctx.lineTo(radius[0], 0)
+  	    ctx.arcTo(0, 0, 0, radius[0], radius[0])
+  	    ctx.fillStyle = color
+  	    ctx.fill();
+  	}
+      }
+  }
+#+END_SRC
+
+* Qt model setData 例子
+[2025-06-26 四 10:45]
+#+BEGIN_SRC C++
+  bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override {
+    if (index.isValid() && index.row() >= 0 && index.row() < dataList.size() && role == Qt::EditRole) {
+      dataList[index.row()] = value.toString();
+      emit dataChanged(index, index, {role}); // 通知视图数据已更改
+      return true;
+    }
+    return false;
+  }
+#+END_SRC
+
+* Qt 创建 blur 效果给窗口
+[2025-06-26 四 19:04]
+engine.load(url);
+
+  auto root = engine.rootObjects().at(0);
+  QQuickWindow *win = root->findChild<QQuickWindow*>();
+
+  int x = 0;
+  int y = 0;
+  int width = 640;
+  int height = 200;
+  int radius = 14;
+
+  QPainterPath path;
+  path.addRoundedRect(x, y, width, height, radius, radius);
+
+  QRegion region(path.toFillPolygon().toPolygon());
+
+  // 设置窗口的区域
+  // win->setMask(region);
+
+  KWindowEffects::enableBlurBehind(win->winId(), true, region);
+
+* Qt qml 按钮动画。
+[2025-06-28 六 16:51]
+import QtQuick 2.15
+import QtQuick.Window 2.15
+import QtQuick.Controls 2.15
+
+Button {
+    id: button
+
+    width: 336
+    height: 44
+
+    background: Rectangle {
+        width: button.width
+	height: button.height
+
+        opacity: enabled ? 1 : 0.3
+
+	radius: 8
+
+        color: "white"
+    }  // Rectangle
+
+    contentItem: Text {
+	anchors.left: parent.left
+	anchors.verticalCenter: parent.verticalCenter
+	anchors.margins: 16
+
+	font.pointSize: 16
+
+	text: button.text
+    }  // Text
+
+    onPressed: anim.start()
+
+    SequentialAnimation {
+        id: anim
+
+        // Expand the button
+        PropertyAnimation {
+            target: button
+            property: "scale"
+            to: 1.2
+            duration: 200
+            easing.type: Easing.InOutQuad
+        }  // PropertyAnimation
+
+        // Shrink back to normal
+        PropertyAnimation {
+            target: button
+            property: "scale"
+            to: 1.0
+            duration: 200
+            easing.type: Easing.InOutQuad
+        }  // PropertyAnimation
+    }  // SequentialAnimation($anim)
+}  // Button($button)
+
+* Qt qml rounded image
+[2025-06-30 一 10:13]
+#+BEGIN_SRC qml
+  Image {
+      id: img
+      anchors.fill: parent
+      source: modelData
+
+      property bool rounded: true
+      property bool adapt: true
+      property var radius: 8
+
+      layer.enabled: rounded
+      layer.effect: OpacityMask {
+  	maskSource: Item {
+  	    width: img.width
+  	    height: img.height
+  	    Rectangle {
+  		anchors.centerIn: parent
+  		width: img.adapt ? img.width : Math.min(img.width, img.height)
+  		height: img.adapt ? img.height : width
+  		radius: 8
+  	    }
+  	}  // Item
+      }  // OpacityMask
+  }  // Image($img)
+#+END_SRC
+
+* C++ 递归创建目录
+[2025-07-08 二 14:13]
+#+BEGIN_SRC C++
+  bool create_directory(const std::string& directory) {
+    try {
+      std::filesystem::create_directories(directory);
+      return true;
+    } catch (const std::exception &e) {
+      std::cout << "[error] kdm_pkg::create_directory std::exception = " << e.what()  << std::endl;
+      return false;
+    }
+
+    std::cout << "[error] kdm_pkg::create_directory failed to create directory = " << directory << std::endl;
+    return false;
+  }
+#+END_SRC
+
+* CMake 模板
+[2025-07-14 一 10:25]
+#+BEGIN_SRC cmake
+  cmake_minimum_required(VERSION 3.16)
+
+  # Set the project name and version
+  project(kt-llm VERSION 1.0)
+
+  # Specify the C++ standard
+  set(CMAKE_CXX_STANDARD 17)
+  set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+  # Add the executable
+  add_library(${PROJECT_NAME} SHARED
+    src/llm_creator.cc
+  )
+
+  # Optionally, you can include directories
+  target_include_directories(${PROJECT_NAME} PRIVATE
+    include)
+
+  # Apply common flags
+  target_compile_options(${PROJECT_NAME} PRIVATE
+    -Wall -Wextra
+    $<$<CONFIG:Debug>:-g -O0>
+    $<$<CONFIG:Release>:-O2>)
+
+  # Optionally, you can link libraries
+  # target_link_libraries(MyExecutable PRIVATE some_library)
+#+END_SRC
+
+* Bash 脚本里获取当前脚本路径
+[2025-07-31 四 09:45]
+#+BEGIN_SRC bash
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+#+END_SRC
+
+* OpenGL 流光 shader
+[2025-07-31 四 10:55]
+#+begin_src glsl
+#version 330 core
+in vec2 fragTexCoord;
+
+uniform sampler2D u_texture;
+
+uniform float u_time;
+uniform float u_speed;
+uniform float u_intensity;
+uniform float u_edgeThickness;
+uniform vec3 u_glowColor;
+
+void main() {
+    // 获取原始纹理颜色
+    vec4 texColor = texture2D(u_texture, fragTexCoord);
+
+    // 更精确的边缘检测
+    vec2 texelSize = vec2(u_edgeThickness) / textureSize(u_texture, 0);
+    texelSize *= 2.0;
+    
+    // 检查透明度边缘
+    float alpha = texColor.a;
+    float alphaUp = texture2D(u_texture, fragTexCoord + vec2(0.0, texelSize.y)).a;
+    float alphaDown = texture2D(u_texture, fragTexCoord - vec2(0.0, texelSize.y)).a;
+    float alphaLeft = texture2D(u_texture, fragTexCoord - vec2(texelSize.x, 0.0)).a;
+    float alphaRight = texture2D(u_texture, fragTexCoord + vec2(texelSize.x, 0.0)).a;
+
+    // 计算透明度变化 (用于透明图片)
+    float alphaEdge = abs(alpha - alphaUp) + abs(alpha - alphaDown) + 
+                      abs(alpha - alphaLeft) + abs(alpha - alphaRight);
+    
+    // 检查亮度边缘 (用于不透明图片)
+    float luma = dot(texColor.rgb, vec3(0.299, 0.587, 0.114));
+    float lumaUp = dot(texture2D(u_texture, fragTexCoord + vec2(0.0, texelSize.y)).rgb, vec3(0.299, 0.587, 0.114));
+    float lumaDown = dot(texture2D(u_texture, fragTexCoord - vec2(0.0, texelSize.y)).rgb, vec3(0.299, 0.587, 0.114));
+    float lumaLeft = dot(texture2D(u_texture, fragTexCoord - vec2(texelSize.x, 0.0)).rgb, vec3(0.299, 0.587, 0.114));
+    float lumaRight = dot(texture2D(u_texture, fragTexCoord + vec2(texelSize.x, 0.0)).rgb, vec3(0.299, 0.587, 0.114));
+    
+    float lumaEdge = abs(luma - lumaUp) + abs(luma - lumaDown) + 
+                     abs(luma - lumaLeft) + abs(luma - lumaRight);
+    
+    // 组合边缘检测 - 取较大值
+    float edge = max(alphaEdge * 4.0, lumaEdge * 2.0);
+    edge = alphaEdge * 4.0;
+    edge = clamp(edge, 0.0, 1.0);
+
+    // 来回移动的流光效果
+    float timeVar = u_time * u_speed * 0.05; // 降低速度让来回效果更明显
+    float pingPongTime = abs(fract(timeVar * 0.5) * 2.0 - 1.0); // 创建0->1->0的来回效果
+    float lightPos = pingPongTime; // 流光位置在0和1之间来回
+    float lightWidth = 0.3; // 流光宽度
+    
+    // 计算当前像素与流光的距离
+    float distToLight = abs(fragTexCoord.x - lightPos);
+    
+    // 创建流光强度，使用平滑过渡
+    float lightIntensity = 1.0 - smoothstep(0.0, lightWidth, distToLight);
+    lightIntensity = pow(lightIntensity, 2.0); // 让流光更聚焦
+    
+    // 最终的发光效果
+    vec3 glow = u_glowColor * edge * u_intensity * lightIntensity;
+
+    // 混合原始颜色和流光效果
+    vec3 finalColor = texColor.rgb + glow;
+
+    gl_FragColor = vec4(finalColor, texColor.a);
+}
+#+end_src
