@@ -647,3 +647,82 @@ void main() {
     gl_FragColor = vec4(finalColor, texColor.a);
 }
 #+end_src
+
+* OpenGL shader 只保留边缘流光
+[2025-07-31 四 15:11]
+
+#+begin_src glsl
+#version 330 core
+in vec2 fragTexCoord;
+
+uniform sampler2D u_texture;
+
+uniform float u_time;
+uniform float u_speed;
+uniform float u_intensity;
+uniform float u_edgeThickness;
+uniform vec3 u_glowColor;
+
+void main() {
+    // 获取原始纹理颜色
+    vec4 texColor = texture2D(u_texture, fragTexCoord);
+
+    // 更精确的边缘检测
+    vec2 texelSize = vec2(u_edgeThickness) / textureSize(u_texture, 0);
+    texelSize *= 2.0;
+    
+    // 检查透明度边缘
+    float alpha = texColor.a;
+    float alphaUp = texture2D(u_texture, fragTexCoord + vec2(0.0, texelSize.y)).a;
+    float alphaDown = texture2D(u_texture, fragTexCoord - vec2(0.0, texelSize.y)).a;
+    float alphaLeft = texture2D(u_texture, fragTexCoord - vec2(texelSize.x, 0.0)).a;
+    float alphaRight = texture2D(u_texture, fragTexCoord + vec2(texelSize.x, 0.0)).a;
+
+    // 计算透明度变化 (用于透明图片)
+    float alphaEdge = abs(alpha - alphaUp) + abs(alpha - alphaDown) + 
+                      abs(alpha - alphaLeft) + abs(alpha - alphaRight);
+    
+    // 检查亮度边缘 (用于不透明图片)
+    float luma = dot(texColor.rgb, vec3(0.299, 0.587, 0.114));
+    float lumaUp = dot(texture2D(u_texture, fragTexCoord + vec2(0.0, texelSize.y)).rgb, vec3(0.299, 0.587, 0.114));
+    float lumaDown = dot(texture2D(u_texture, fragTexCoord - vec2(0.0, texelSize.y)).rgb, vec3(0.299, 0.587, 0.114));
+    float lumaLeft = dot(texture2D(u_texture, fragTexCoord - vec2(texelSize.x, 0.0)).rgb, vec3(0.299, 0.587, 0.114));
+    float lumaRight = dot(texture2D(u_texture, fragTexCoord + vec2(texelSize.x, 0.0)).rgb, vec3(0.299, 0.587, 0.114));
+    
+    float lumaEdge = abs(luma - lumaUp) + abs(luma - lumaDown) + 
+                     abs(luma - lumaLeft) + abs(luma - lumaRight);
+    
+    // 组合边缘检测 - 取较大值
+    float edge = max(alphaEdge * 4.0, lumaEdge * 2.0);
+    edge = alphaEdge * 4.0;
+    edge = clamp(edge, 0.0, 1.0);
+
+    // 来回移动的流光效果
+    float timeVar = u_time * u_speed * 0.05; // 降低速度让来回效果更明显
+    float pingPongTime = abs(fract(timeVar * 0.5) * 2.0 - 1.0); // 创建0->1->0的来回效果
+    float lightPos = pingPongTime; // 流光位置在0和1之间来回
+    float lightWidth = 0.3; // 流光宽度
+    
+    // 计算当前像素与流光的距离
+    float distToLight = abs(fragTexCoord.x - lightPos);
+    
+    // 创建流光强度，使用平滑过渡
+    float lightIntensity = 1.0 - smoothstep(0.0, lightWidth, distToLight);
+    lightIntensity = pow(lightIntensity, 2.0); // 让流光更聚焦
+    
+    // 最终的发光效果
+    vec4 glow = vec4(u_glowColor, texColor.a) * edge * u_intensity * lightIntensity;
+
+    // 只要边缘流光
+    vec4 finalColor = glow;
+
+    gl_FragColor = finalColor;
+}
+#+end_src
+
+* Linux 获取用户目录
+<2025-08-15 五>
+#+begin_src bash
+  xdg-user-dir DESKTOP
+#+end_src
+这个命令会返回当前用户的桌面文件夹的完整路径，无论系统语言是中文还是英文。
