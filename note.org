@@ -724,5 +724,6 @@ void main() {
 <2025-08-15 五>
 #+begin_src bash
   xdg-user-dir DESKTOP
+  DESKTOP_DIR=$(xdg-user-dir DESKTOP)
 #+end_src
 这个命令会返回当前用户的桌面文件夹的完整路径，无论系统语言是中文还是英文。
