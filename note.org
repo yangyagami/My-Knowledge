@@ -416,6 +416,7 @@ QImageReader reader(path);
 
 * Qt 创建 blur 效果给窗口
 [2025-06-26 四 19:04]
+#+begin_src C++
 engine.load(url);
 
   auto root = engine.rootObjects().at(0);
@@ -436,9 +437,11 @@ engine.load(url);
   // win->setMask(region);
 
   KWindowEffects::enableBlurBehind(win->winId(), true, region);
+#+end_src
 
 * Qt qml 按钮动画。
 [2025-06-28 六 16:51]
+#+begin_src qml
 import QtQuick 2.15
 import QtQuick.Window 2.15
 import QtQuick.Controls 2.15
@@ -494,6 +497,7 @@ Button {
         }  // PropertyAnimation
     }  // SequentialAnimation($anim)
 }  // Button($button)
+#+end_src
 
 * Qt qml rounded image
 [2025-06-30 一 10:13]
