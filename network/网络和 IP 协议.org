@@ -107,7 +107,7 @@ network: packets of data
 
 ** TCP Byte Stream
 *TCP 建立连接需要 3 次握手。*
-总结为：SYN,SYN ACK,ACK （同步、同步确认、确认）。
+总结为：SYN, SYN ACK, ACK （同步、同步确认、确认）。
   1. 客户端向服务器发送 SYN 消息。
   2. 服务端向客户端发送 SYN ACK(ACKNOWLEDGE) 消息。
   3. 客户端响应并且确认服务器的同步，发送 ACK 消息。
