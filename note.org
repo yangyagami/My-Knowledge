@@ -731,3 +731,6 @@ void main() {
   DESKTOP_DIR=$(xdg-user-dir DESKTOP)
 #+end_src
 这个命令会返回当前用户的桌面文件夹的完整路径，无论系统语言是中文还是英文。
+
+* FP32、FP64
+FP 指的是 Floating-Point 。
