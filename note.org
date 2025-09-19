@@ -737,3 +737,6 @@ FP 指的是 Floating-Point 。
 
 * AVX-512
 AVX-512 are 512-bit extensions to the 256-bit Advanced Vector Extensions SIMD instructions for x86 instruction set architecture proposed by Intel in July 2013, and first implemented in the 2016 Intel Xeon Phi x200, and then later in a number of AMD and other Intel CPUs. AVX-512 consists of multiple extensions that may be implemented independently. This policy is a departure from the historical requirement of implementing the entire instruction block.
+
+* AMX
+Advanced Matrix Extensions (AMX), also known as Intel Advanced Matrix Extensions (Intel AMX), are extensions to the x86 instruction set architecture (ISA) for microprocessors from Intel designed to work on matrices to accelerate artificial intelligence (AI) and machine learning (ML) workloads.
