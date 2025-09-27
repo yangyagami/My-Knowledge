@@ -3,66 +3,25 @@
 #+DATE: <2025-02-26 三>
 #+EMAIL: a651685099@163.com
 
-在 Qt 中，信号（Signal）与槽（Slot）的连接方式（Connection Type）决定了信号触发时槽函数的调用时机和执行线程。Qt 在 connect 时如何选择连接方式取决于以下两个关键因素：
-1. 连接方式的类型
-Qt 提供了 5 种连接方式（通过 Qt::ConnectionType 枚举定义）：
-    - AutoConnection（默认）
-      行为：自动选择 DirectConnection 或  QueuedConnection，取决于信号发送者（Sender）和接收者（Receiver）是否在同一个线程。
-    - DirectConnection
-        行为：信号触发时，槽函数立即在信号发送者的线程中同步执行。
-    - QueuedConnection
-        行为：槽函数会被放入接收者线程的事件队列中，异步执行（通过事件循环）。
-    - BlockingQueuedConnection
-        行为：类似 QueuedConnection，但发送者线程会阻塞，直到槽函数执行完成（需谨慎使用，避免死锁）。
-    - UniqueConnection
-        行为：与 AutoConnection 类似，但确保同一信号和槽之间仅有一个连接（防止重复连接）。
+*QObject::connect() itself is thread-safe.*
 
-2. Qt 如何自动选择连接方式（AutoConnection）
-当使用默认的 Qt::AutoConnection 时，Qt 会通过 *发送信号（emit 的时候）所在的线程* 以及对象所属线程来判断。
++ Qt::AutoConnection
+  (Default) If the receiver lives in the thread that emits the signal, Qt::DirectConnection is used. Otherwise, Qt::QueuedConnection is used. The connection type is determined when the signal is emitted.
++ Qt::DirectConnection
+  The slot is invoked immediately when the signal is emitted. *The slot is executed in the signalling thread.*
++ Qt::QueuedConnection
+  The slot is invoked when control returns to the event loop of the receiver's thread. The slot is executed in the receiver's thread.
++ Qt::BlockingQueuedConnection
+  Same as Qt::QueuedConnection, except that the signalling thread blocks until the slot returns. This connection must not be used if the receiver lives in the signalling thread, or else the application will deadlock.
++ Qt::UniqueConnection
+  This is a flag that can be combined with any one of the above connection types, using a bitwise OR. When Qt::UniqueConnection is set, QObject::connect() will fail if the connection already exists (i.e. if the same signal is already connected to the same slot for the same pair of objects).  
++ Qt::SingleShotConnection
+  This is a flag that can be combined with any one of the above connection types, using a bitwise OR. When Qt::SingleShotConnection is set, the slot is going to be called only once; the connection will be automatically broken when the signal is emitted. This flag was introduced in Qt 6.0.
 
-底层实现机制
-    - Qt 会检查发送者对象（sender）和接收者对象（receiver）的线程亲和性（即 *QObject::thread()* ）。
-    - 如果 sender 和 receiver 的线程相同，槽函数会直接调用（无事件队列）。
-    - 如果线程不同，信号会被封装为事件（ *QMetaCallEvent* ），投递到接收者线程的事件队列中，由接收者线程的事件循环处理。
+With queued connections, the parameters must be of types that are known to Qt's meta-object system, because Qt needs to copy the arguments to store them in an event behind the scenes. If you try to use a queued connection and get the error message:
 
-3. 关键代码示例
-#+BEGIN_SRC C++
-// 默认连接方式（AutoConnection）
-connect(sender, &Sender::signal, receiver, &Receiver::slot);
+#+begin_src shell
+  QObject::connect: Cannot queue arguments of type 'MyType'
+#+end_src
 
-// 显式指定连接方式
-connect(sender, &Sender::signal, receiver, &Receiver::slot, Qt::QueuedConnection);
-#+END_SRC
-
-4. 多线程场景下的典型问题
-场景 1：跨线程修改 GUI
-#+BEGIN_SRC C++
-// 后台线程完成工作后更新 UI
-connect(workerThread, &WorkerThread::resultReady, guiObject, &GUI::updateUI, Qt::QueuedConnection);
-#+END_SRC
-    - 原因：GUI 对象（如 QWidget）通常属于主线程，必须通过 QueuedConnection 确保槽函数在主线程执行。
-
-场景 2：线程间同步操作
-#+BEGIN_SRC C++
-// 发送者线程需要等待接收者线程完成操作
-connect(sender, &Sender::signal, receiver, &Receiver::slot, Qt::BlockingQueuedConnection);
-#+END_SRC
-    - 风险：若接收者线程正在等待发送者线程，会导致死锁。
-
-5. 手动选择连接方式的准则
-| 连接方式                   | 适用场景                             |
-| DirectConnection         | 单线程内高性能调用，或确保线程安全的场景。 |
-| QueuedConnection         | 跨线程通信，避免直接访问接收者线程资源。   |
-| BlockingQueuedConnection | 需要同步等待跨线程操作完成（谨慎使用！）。 |
-| UniqueConnection         | 防止同一信号和槽被多次连接。             |
-
-6. 高级：元对象系统（Meta-Object System）的作用
-Qt 在运行时通过 元对象系统 动态解析信号和槽的连接方式：
-    - 信号和槽的签名匹配：通过 SIGNAL() 和 SLOT() 宏（或在 Qt5 后的函数指针）进行类型检查。
-    - 线程亲和性检查：在 connect 时记录发送者和接收者的线程信息。
-    - 事件队列投递：跨线程时，信号参数会被序列化（通过 QMetaType），确保线程安全。
-
-7. 总结
-    - 默认行为：Qt::AutoConnection 根据线程亲和性自动选择 Direct 或 Queued。
-    - 显式指定：在复杂多线程场景中，应手动指定连接方式以确保逻辑正确性。
-    - 线程安全：跨线程通信必须使用 QueuedConnection 或 BlockingQueuedConnection，避免直接操作对象。
+Call qRegisterMetaType() to register the data type before you establish the connection.
