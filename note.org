@@ -740,3 +740,9 @@ AVX-512 are 512-bit extensions to the 256-bit Advanced Vector Extensions SIMD in
 
 * AMX
 Advanced Matrix Extensions (AMX), also known as Intel Advanced Matrix Extensions (Intel AMX), are extensions to the x86 instruction set architecture (ISA) for microprocessors from Intel designed to work on matrices to accelerate artificial intelligence (AI) and machine learning (ML) workloads.
+
+* Qt 获取屏幕大小
+#+begin_src C++
+  QScreen *screen = QGuiApplication::primaryScreen();
+  QSize screen_size = screen->availableSize();
+#+end_src
