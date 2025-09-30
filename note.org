@@ -746,3 +746,16 @@ Advanced Matrix Extensions (AMX), also known as Intel Advanced Matrix Extensions
   QScreen *screen = QGuiApplication::primaryScreen();
   QSize screen_size = screen->availableSize();
 #+end_src
+
+* C 语言对数组取地址结果不变
+#+begin_src C
+  #include <stdio.h>
+
+  int main() {
+          char arr[5] = { 0 };  // &arr == arr
+
+          printf(":)\n");
+
+          return 0;
+  }
+#+end_src
