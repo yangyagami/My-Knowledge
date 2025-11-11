@@ -759,3 +759,197 @@ Advanced Matrix Extensions (AMX), also known as Intel Advanced Matrix Extensions
           return 0;
   }
 #+end_src
+
+* C/C++ static 会自动初始化为 0
+#+begin_src C
+   #include <stdio.h>
+
+   static int test;
+
+   int main() {
+           printf("test: %d\n", test);
+           return 0;
+   }
+
+   /*
+     output: test: 0
+   */
+#+end_src
+
+* Qt DBus 链接信号如果签名未知应该用 QDBusMessage
+#+begin_src C++
+  bool connected = QDBusConnection::systemBus().connect(
+      "",
+      "",
+      // "org.powertop.service",
+      // "/org/powertop/service",
+      "org.powertop.service",
+      "ProcessPowerEstChanged",
+      this,
+      SLOT(OnMessageReceived(const QDBusMessage &)));
+
+  void ProcessPowerMonitor::OnMessageReceived(const QDBusMessage &message) {
+    qDebug() << __PRETTY_FUNCTION__ << message.arguments().size();
+
+    if (message.arguments().isEmpty())
+      return;
+
+    QVariant var = message.arguments().first();
+    if (!var.canConvert<QDBusArgument>())
+      return;
+
+    QDBusArgument arg = var.value<QDBusArgument>();
+
+    QList<QVariantMap> result;
+
+    arg.beginArray();
+    while (!arg.atEnd()) {
+      QVariantMap item;
+
+      arg >> item;
+
+      result.append(item);
+    }
+    arg.endArray();
+
+    qDebug() << "result size:" << result.size();
+
+    for (const QVariantMap &map : result) {
+      qDebug() << map;
+    }
+  }
+#+end_src
+
+* qml 无边框窗口阴影实现方案
+#+begin_src qml
+  import QtQuick 2.15
+  import QtQuick.Window 2.15
+
+  Window {
+      width: 400
+      height: 300
+
+      visible: true
+
+      color: "white"
+      flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
+
+      Canvas {
+  	id: shadowCanvas
+  	
+  	property real cornerRadius: 10
+
+  	anchors.fill: parent
+
+  	antialiasing: true
+  	
+  	onPaint: {
+              var ctx = getContext("2d")
+              ctx.clearRect(0, 0, width, height)
+              
+              // 绘制圆角矩形函数
+              function drawRoundedRect(x, y, width, height, radius) {
+  		ctx.beginPath()
+  		ctx.moveTo(x + radius, y)
+  		ctx.lineTo(x + width - radius, y)
+  		ctx.arcTo(x + width, y, x + width, y + radius, radius)
+  		ctx.lineTo(x + width, y + height - radius)
+  		ctx.arcTo(x + width, y + height, x + width - radius, y + height, radius)
+  		ctx.lineTo(x + radius, y + height)
+  		ctx.arcTo(x, y + height, x, y + height - radius, radius)
+  		ctx.lineTo(x, y + radius)
+  		ctx.arcTo(x, y, x + radius, y, radius)
+  		ctx.closePath()
+              }
+              
+              // 先绘制所有阴影
+              for (var i = 0; i < 10; i++) {
+  		var offset = 10 - i
+  		var rectWidth = width - offset * 2
+  		var rectHeight = height - offset * 2
+  		
+  		// 调整阴影的圆角半径，使其随着阴影层变化
+  		var shadowRadius = cornerRadius + i
+  		// shadowRadius = 0
+  		
+  		var alpha = 150 - Math.sqrt(i) * 50
+  		var color = "rgba(0, 0, 0, " + (alpha / 255) + ")"
+  		
+  		ctx.strokeStyle = color
+  		ctx.lineWidth = 1
+  		
+  		drawRoundedRect(offset, offset, rectWidth, rectHeight, shadowRadius)
+
+  		console.debug(offset, offset, rectWidth, rectHeight)
+  		ctx.stroke()
+              }
+              
+              // 最后绘制白色填充矩形
+              // ctx.fillStyle = "white"
+              // drawRoundedRect(10, 10, width - 20, height - 20, cornerRadius)
+              // ctx.fill()
+  	}
+  	
+  	onWidthChanged: requestPaint()
+  	onHeightChanged: requestPaint()
+      }
+
+  }
+
+#+end_src
+
+* 库搜索的时候，会自动查找相关依赖，run path 取决于被需要的二进制。
+#+begin_src bash
+  57019:	file=libc.so.6 [0];  needed by ./xiaotian [0]
+  57019:	find library=libc.so.6 [0]; searching
+  57019:	 search path=/opt/apps/com.lenovo.kedge/vcpkg_installed/x64-linux/lib:/opt/apps/com.lenovo.kedge/lib:/home/yangsiyu/Qt/5.15.2/gcc_64/lib:/home/yangsiyu/QtProjs/temp/ai-mouse/build/printer		(RUNPATH from file ./xiaotian)
+  57019:	  trying file=/opt/apps/com.lenovo.kedge/vcpkg_installed/x64-linux/lib/libc.so.6
+  57019:	  trying file=/opt/apps/com.lenovo.kedge/lib/libc.so.6
+  57019:	  trying file=/home/yangsiyu/Qt/5.15.2/gcc_64/lib/libc.so.6
+  57019:	  trying file=/home/yangsiyu/QtProjs/temp/ai-mouse/build/printer/libc.so.6
+  57019:	 search cache=/etc/ld.so.cache
+  57019:	  trying file=/lib/x86_64-linux-gnu/libc.so.6
+  57019:	
+  57019:	file=libc.so.6 [0];  generating link map
+  57019:	  dynamic: 0x00007f939869db80  base: 0x00007f93984bd000   size: 0x00000000001e6660
+  57019:	    entry: 0x00007f93984e1450  phdr: 0x00007f93984bd040  phnum:                 14
+  57019:	
+  57019:	
+  57019:	file=liblogger.so [0];  needed by /opt/apps/com.lenovo.kedge/lib/libgrpcbase.so [0]
+  57019:	find library=liblogger.so [0]; searching
+  57019:	 search cache=/etc/ld.so.cache
+  57019:	 search path=/lib/x86_64-linux-gnu/tls/haswell/x86_64:/lib/x86_64-linux-gnu/tls/haswell:/lib/x86_64-linux-gnu/tls/x86_64:/lib/x86_64-linux-gnu/tls:/lib/x86_64-linux-gnu/haswell/x86_64:/lib/x86_64-linux-gnu/haswell:/lib/x86_64-linux-gnu/x86_64:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu/tls/haswell/x86_64:/usr/lib/x86_64-linux-gnu/tls/haswell:/usr/lib/x86_64-linux-gnu/tls/x86_64:/usr/lib/x86_64-linux-gnu/tls:/usr/lib/x86_64-linux-gnu/haswell/x86_64:/usr/lib/x86_64-linux-gnu/haswell:/usr/lib/x86_64-linux-gnu/x86_64:/usr/lib/x86_64-linux-gnu:/lib/tls/haswell/x86_64:/lib/tls/haswell:/lib/tls/x86_64:/lib/tls:/lib/haswell/x86_64:/lib/haswell:/lib/x86_64:/lib:/usr/lib/tls/haswell/x86_64:/usr/lib/tls/haswell:/usr/lib/tls/x86_64:/usr/lib/tls:/usr/lib/haswell/x86_64:/usr/lib/haswell:/usr/lib/x86_64:/usr/lib		(system search path)
+  57019:	  trying file=/lib/x86_64-linux-gnu/tls/haswell/x86_64/liblogger.so
+  57019:	  trying file=/lib/x86_64-linux-gnu/tls/haswell/liblogger.so
+  57019:	  trying file=/lib/x86_64-linux-gnu/tls/x86_64/liblogger.so
+  57019:	  trying file=/lib/x86_64-linux-gnu/tls/liblogger.so
+  57019:	  trying file=/lib/x86_64-linux-gnu/haswell/x86_64/liblogger.so
+  57019:	  trying file=/lib/x86_64-linux-gnu/haswell/liblogger.so
+  57019:	  trying file=/lib/x86_64-linux-gnu/x86_64/liblogger.so
+  57019:	  trying file=/lib/x86_64-linux-gnu/liblogger.so
+  57019:	  trying file=/usr/lib/x86_64-linux-gnu/tls/haswell/x86_64/liblogger.so
+  57019:	  trying file=/usr/lib/x86_64-linux-gnu/tls/haswell/liblogger.so
+  57019:	  trying file=/usr/lib/x86_64-linux-gnu/tls/x86_64/liblogger.so
+  57019:	  trying file=/usr/lib/x86_64-linux-gnu/tls/liblogger.so
+  57019:	  trying file=/usr/lib/x86_64-linux-gnu/haswell/x86_64/liblogger.so
+  57019:	  trying file=/usr/lib/x86_64-linux-gnu/haswell/liblogger.so
+  57019:	  trying file=/usr/lib/x86_64-linux-gnu/x86_64/liblogger.so
+  57019:	  trying file=/usr/lib/x86_64-linux-gnu/liblogger.so
+  57019:	  trying file=/lib/tls/haswell/x86_64/liblogger.so
+  57019:	  trying file=/lib/tls/haswell/liblogger.so
+  57019:	  trying file=/lib/tls/x86_64/liblogger.so
+  57019:	  trying file=/lib/tls/liblogger.so
+  57019:	  trying file=/lib/haswell/x86_64/liblogger.so
+  57019:	  trying file=/lib/haswell/liblogger.so
+  57019:	  trying file=/lib/x86_64/liblogger.so
+  57019:	  trying file=/lib/liblogger.so
+  57019:	  trying file=/usr/lib/tls/haswell/x86_64/liblogger.so
+  57019:	  trying file=/usr/lib/tls/haswell/liblogger.so
+  57019:	  trying file=/usr/lib/tls/x86_64/liblogger.so
+  57019:	  trying file=/usr/lib/tls/liblogger.so
+  57019:	  trying file=/usr/lib/haswell/x86_64/liblogger.so
+  57019:	  trying file=/usr/lib/haswell/liblogger.so
+  57019:	  trying file=/usr/lib/x86_64/liblogger.so
+  57019:	  trying file=/usr/lib/liblogger.so
+  57019:	
+#+end_src
