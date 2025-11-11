@@ -5,6 +5,8 @@
 
 前置：[[file:信号连接方式.org][信号和槽的连接方式]]
 
+*重复的 connect 语句会产生重复的 slot 调用。*
+
 * SIGNAL 如何调用
 signal 函数被 moc 实现，最终调用 QMetaObject::activate 然后 QMetaObject::activate 调用 doActivate 。
 - 如果连接方式为 queued, 那么 doActivate 会调用 queued_activate ：
