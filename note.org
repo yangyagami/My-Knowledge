@@ -729,6 +729,7 @@ void main() {
 #+begin_src bash
   xdg-user-dir DESKTOP
   DESKTOP_DIR=$(xdg-user-dir DESKTOP)
+  DESKTOP_NAME=$(basename "$DESKTOP_DIR")
 #+end_src
 这个命令会返回当前用户的桌面文件夹的完整路径，无论系统语言是中文还是英文。
 
@@ -953,3 +954,6 @@ Advanced Matrix Extensions (AMX), also known as Intel Advanced Matrix Extensions
   57019:	  trying file=/usr/lib/liblogger.so
   57019:	
 #+end_src
+
+* 内网端口访问问题
+127.0.0.1 只能本机器访问，想要其他机器访问需要绑定 0.0.0.0 。
