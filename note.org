@@ -957,3 +957,10 @@ Advanced Matrix Extensions (AMX), also known as Intel Advanced Matrix Extensions
 
 * 内网端口访问问题
 127.0.0.1 只能本机器访问，想要其他机器访问需要绑定 0.0.0.0 。
+
+
+* 使用 patchelf 事后修改 libA.so 的 RUNPATH
+如果你没有 libA.so 的源码或不想重新编译，可以用 patchelf 工具添加：
+#+begin_src bash
+  patchelf --set-rpath '$ORIGIN' libA.so
+#+end_src
