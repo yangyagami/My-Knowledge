@@ -964,3 +964,8 @@ Advanced Matrix Extensions (AMX), also known as Intel Advanced Matrix Extensions
 #+begin_src bash
   patchelf --set-rpath '$ORIGIN' libA.so
 #+end_src
+
+* Linux 获取发行版名字。
+#+begin_src bash
+  grep "^ID=" /etc/os-release | cut -d'=' -f2
+#+end_src
