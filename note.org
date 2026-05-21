@@ -969,3 +969,12 @@ Advanced Matrix Extensions (AMX), also known as Intel Advanced Matrix Extensions
 #+begin_src bash
   grep "^ID=" /etc/os-release | cut -d'=' -f2
 #+end_src
+
+* QML 渲染闪烁问题。
+#+begin_src qml
+  layer.enabled: true
+
+  Holds whether the item is layered or not. Layering is disabled by default.
+  A layered item is rendered into an offscreen surface and cached until it is changed. Enabling layering for complex QML item hierarchies can sometimes be an optimization.
+  None of the other layer properties have any effect when the layer is disabled.
+#+end_src
