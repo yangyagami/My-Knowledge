@@ -1,0 +1,127 @@
+#+TITLE: qml 小技巧.org
+#+DATE: <2026-06-24 Wed>
+#+AUTHOR: yangsiyu
+
+* Tree 的实现方案
+[[https://runebook.dev/en/docs/qt/qml-qtquick-controls-treeviewdelegate/treeView][参考网站]]
+
+基于嵌套层级的数据结构：
+
+#+begin_src qml
+// NodeItem.qml (The recursive component)
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+
+Item {
+    // Model property for the data of this node
+    property var nodeData: ({})
+    property int level: 0
+
+    Column {
+        width: parent.width
+
+        // --- 1. The main row content ---
+        Row {
+            width: parent.width
+            spacing: 5
+            x: level * 20 // Manual Indentation
+
+            Button {
+                text: nodeData.name
+                onClicked: nodeData.expanded = !nodeData.expanded
+                // A simple visual indicator instead of a standard tree icon
+                contentItem: Text {
+                    text: (nodeData.children && nodeData.children.length > 0) ? (nodeData.expanded ? "▼ " : "► ") + nodeData.name : nodeData.name
+                }
+            }
+        }
+
+        // --- 2. Recursively create children ---
+        Repeater {
+            model: nodeData.children
+            visible: nodeData.expanded
+
+            NodeItem {
+                width: parent.width
+                nodeData: modelData
+                level: parent.level + 1 // Increment level for indentation
+            }
+        }
+    }
+}
+
+// Main.qml
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Window 2.15
+
+Window {
+    width: 400
+    height: 600
+    visible: true
+    title: "Custom QML Tree"
+
+    // Example Hierarchical Data
+    property var treeModel: [
+        { name: "Root Item 1", expanded: true, children: [
+            { name: "Child A", expanded: false, children: [] },
+            { name: "Child B", expanded: true, children: [
+                { name: "Grandchild 1", expanded: false, children: [] }
+            ]}
+        ]},
+        { name: "Root Item 2", expanded: false, children: [] }
+    ]
+
+    Flickable { // Use Flickable for scrolling
+        anchors.fill: parent
+        contentWidth: width
+        contentHeight: treeContent.height
+
+        Column {
+            id: treeContent
+            width: parent.width
+
+            Repeater {
+                model: treeModel
+                NodeItem {
+                    width: parent.width
+                    nodeData: modelData
+                }
+            }
+        }
+    }
+}
+#+end_src
+
+基于 ListView 的方案：
+
+#+begin_src qml
+// Displaying the flattened list with a standard ListView
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+
+ListView {
+    id: flattenedView
+    width: 300
+    height: 400
+    // The C++ Proxy Model that flattens the tree structure
+    model: yourFlatteningProxyModel
+
+    delegate: ItemDelegate {
+        width: parent.width
+        // The C++ model exposes the 'name' and 'depth' role
+        text: model.name
+
+        // Indent based on the 'depth' role exposed by the C++ model
+        leftPadding: model.depth * 20
+
+        // You'll need an element to toggle expansion, which calls a C++ method
+        Button {
+            visible: model.hasChildren
+            text: model.isExpanded ? "▼" : "►"
+            onClicked: yourFlatteningProxyModel.toggleExpansion(model.modelIndex)
+            anchors.right: parent.right
+        }
+    }
+}
+#+end_src

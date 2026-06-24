@@ -978,3 +978,6 @@ Advanced Matrix Extensions (AMX), also known as Intel Advanced Matrix Extensions
   A layered item is rendered into an offscreen surface and cached until it is changed. Enabling layering for complex QML item hierarchies can sometimes be an optimization.
   None of the other layer properties have any effect when the layer is disabled.
 #+end_src
+
+* 什么是 init ramfs
+init ramfs 是 initial ram file system（初始内存文件系统），它是一个简单的文件系统，存储在内存中。内核用它来加载初始进程。这是现代 Linux 发行版加载第一个进程的方式。
